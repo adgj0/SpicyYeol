@@ -213,3 +213,94 @@ class TaskManager {
         this.toggleEditMode(); // Edit 모드 종료
         this.save();
     }
+
+    /* ─────────────────── D-DAY ─────────────────── */
+    initDday() {
+        const setBtn    = document.getElementById('dday-set-btn');
+        const dropdown  = document.getElementById('dday-dropdown');
+        const cancelBtn = document.getElementById('dday-cancel-btn');
+        const saveBtn   = document.getElementById('dday-save-btn');
+
+        setBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            dropdown.classList.remove('open');
+            document.getElementById('dday-name-input').value = '';
+            document.getElementById('dday-date-input').value = '';
+        });
+
+        saveBtn.addEventListener('click', () => {
+            const name = document.getElementById('dday-name-input').value.trim();
+            const date = document.getElementById('dday-date-input').value;
+            if (!name || !date) return alert('이름과 날짜를 모두 입력해주세요.');
+
+            this.ddays.push({ id: Date.now(), name, date });
+            document.getElementById('dday-name-input').value = '';
+            document.getElementById('dday-date-input').value = '';
+
+            if (this.ddays.length === 1) this.activeDdayId = this.ddays[0].id;
+            this.save();
+        });
+
+        // 외부 클릭시 닫기
+        document.addEventListener('click', (e) => {
+            const widget = document.getElementById('dday-widget');
+            if (!widget.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+    }
+
+    renderDdays() {
+        const list = document.getElementById('dday-list');
+        list.innerHTML = '';
+
+        this.ddays.forEach(d => {
+            const daysLeft = this._daysLeft(d.date);
+            const item = document.createElement('div');
+            item.className = `dday-item${this.activeDdayId === d.id ? ' active-dday' : ''}`;
+            item.innerHTML = `
+                <span class="dday-item-name">${d.name}</span>
+                <span class="dday-item-val">D-${daysLeft < 0 ? Math.abs(daysLeft) + '(지남)' : daysLeft}</span>
+                <button class="dday-item-del" data-id="${d.id}" title="삭제">✕</button>
+            `;
+
+            // 선택
+            item.addEventListener('click', (e) => {
+                if (e.target.classList.contains('dday-item-del')) return;
+                this.activeDdayId = d.id;
+                this.renderDdays();
+                this._updateDdayWidget();
+            });
+
+            // 삭제
+            item.querySelector('.dday-item-del').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.ddays = this.ddays.filter(x => x.id !== d.id);
+                if (this.activeDdayId === d.id) this.activeDdayId = this.ddays[0]?.id || null;
+                this.save();
+            });
+
+            list.appendChild(item);
+        });
+
+        this._updateDdayWidget();
+    }
+
+    _updateDdayWidget() {
+        const info = document.getElementById('dday-info');
+        const active = this.ddays.find(d => d.id === this.activeDdayId);
+        if (active) {
+            const dl = this._daysLeft(active.date);
+            info.innerHTML = `
+                <span class="dday-name">${active.name}</span>
+                <span class="dday-value">D-${dl < 0 ? Math.abs(dl) + '(지남)' : dl}</span>
+            `;
+        } else {
+            info.innerHTML = `<span class="dday-label">D-Day 설정</span>`;
+        }
+    }
+
