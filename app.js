@@ -378,3 +378,77 @@ class TaskManager {
             `;
             bannersEl.appendChild(div);
         }
+
+/* ── TASK LIST ── */
+        this.tasks.forEach(task => {
+            const dl = this._daysLeft(task.date);
+
+            // 필터
+            if (this.currentFilterStatus === 'in_progress' && task.status !== 'before') return;
+            if (this.currentFilterStatus === 'done'        && task.status !== 'done')   return;
+            if (this.currentFilterStatus === 'all'         && task.status === 'done')   return;
+            if (selectedCategory !== 'all' && task.category !== selectedCategory)       return;
+
+            const li = document.createElement('li');
+            const isDone   = task.status === 'done';
+            const isFailed = isDone && task.result === 'X';
+            li.className = `task-card ${isDone ? (isFailed ? 'failed-item' : 'done-item') : ''} ${this.selectedIds.has(task.id) ? 'selected-card' : ''}`;
+
+            // 체크박스 상태 클래스
+            let cbClass = '';
+            if (task.result === 'O')        cbClass = 'checked-O';
+            else if (task.result === 'triangle') cbClass = 'checked-triangle';
+            else if (task.result === 'X')   cbClass = 'checked-X';
+
+            const cbContent = task.result === 'O' ? 'O' : task.result === 'triangle' ? '△' : task.result === 'X' ? 'X' : '';
+
+            li.innerHTML = `
+                ${this.editMode ? `
+                    <div class="multi-select-circle ${this.selectedIds.has(task.id) ? 'checked' : ''}"
+                         data-id="${task.id}">
+                         ${this.selectedIds.has(task.id) ? '✓' : ''}
+                    </div>
+                ` : ''}
+                <div class="task-checkbox ${cbClass}" data-id="${task.id}">${cbContent}</div>
+                <div class="task-left-core">
+                    <span class="badge-cat">${catMap[task.category]}</span>
+                    <span class="task-title-text">${task.title}</span>
+                    <span class="task-meta">D-${dl < 0 ? 'Over' : dl}</span>
+                </div>
+                ${isDone ? `<span class="task-done-label">${task.result} 판정 완료</span>` : ''}
+            `;
+
+            // 체크박스 클릭 → 팝업
+            const cb = li.querySelector('.task-checkbox');
+            cb.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.editMode) return;
+                if (isDone) return; // 완료된 건 재판정 불가
+                this.openCheckPopup(task.id, cb);
+            });
+
+            // 다중선택 원형 클릭
+            if (this.editMode) {
+                const circle = li.querySelector('.multi-select-circle');
+                circle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleSelectTask(task.id);
+                });
+            }
+
+            // 카드 클릭 → 상세보기 (Edit 모드 아닐 때)
+            li.addEventListener('click', (e) => {
+                if (this.editMode) {
+                    this.toggleSelectTask(task.id);
+                    return;
+                }
+                // 체크박스 클릭이 아닌 경우 상세보기
+                if (!e.target.classList.contains('task-checkbox')) {
+                    this.openDetailModal(task.id);
+                }
+            });
+
+            if (lists[task.priority]) lists[task.priority].appendChild(li);
+        });
+    }
+}
