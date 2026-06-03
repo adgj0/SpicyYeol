@@ -139,8 +139,37 @@ dday-icon { font-size: 14px; }
 .dday-item-del:hover { color: var(--primary); }
 
 .urgent-banners { display: flex; flex_direction: column; gap: 10px; margin-bottom: 20px; }
-.banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
-.banner h3 { font-size: 18px; margin-bottom: 4px; }
+.banner {
+    padding: 14px 20px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    cursor: default;
+    animation: banner-in 0.3s ease;
+}
+@keyframes banner-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+.banner-red { background: var(--primary-container); }
+.banner-yellow { background: #e0a800; }
+
+.banner-tasks-list { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+
+.banner-task-chip {
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.banner-task-d { font-size: 11px; opacity: 0.9; }
+
+.banner-icon-big { font-size: 28px; margin-left: 16px; }
 
 .filter-control-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .sub-status-tabs { display: flex; gap: 16px; }
