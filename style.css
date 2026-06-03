@@ -35,10 +35,11 @@ body { background: var(--surface); color: var(--on-surface); height: 100vh; over
 }
 
 .main-content { flex: 1; display: flex; flex-direction: column; padding: 28px 32px; overflow-y: auto; min-width: 0; }
-.main-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--outline); padding-bottom: 16px; margin-bottom: 24px; }
+.main-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--outline); padding-bottom: 16px; margin-bottom: 20px; }
 .nav-tabs { display: flex; gap: 24px; }
 .tab-item { font-size: 22px; font-weight: 600; cursor: pointer; }
 .tab-item.active { color: var(--on-surface); font-weight: 700; font-size: 24px; }
+.header-widgets { display: flex; align-items: center; gap: 12px; position: relative; }
 .widget-coin { background: var(--secondary-container); padding: 8px 16px; border-radius: 20px; font-weight: bold; }
 
 .urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
