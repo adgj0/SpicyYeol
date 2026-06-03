@@ -6,8 +6,12 @@ const todoInput = document.querySelector("#todoInput");
 const todoList = document.querySelector("#todoList");
 const todoCount = document.querySelector("#todoCount");
 const emptyState = document.querySelector("#emptyState");
-const sunflower = document.querySelector("#sunflower");
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
+const sunflowerGarden = document.querySelector("#sunflowerGarden");
+const fertGauge = document.querySelector("#fertGauge");
+const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
+sunflowerGarden.appendChild(sfCanvas);
+SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
 const today = new Date();
@@ -165,40 +169,27 @@ function renderTodoList() {
     todoList.appendChild(item);
   });
 
-  renderSunflower(completedCount, todos.length);
+  renderSunflower();
 }
 
-function renderSunflower(completedCount, totalCount) {
-  const ratio = totalCount === 0 ? 0 : completedCount / totalCount;
-  const scale = 0.42 + ratio * 0.58;
-  const drop = 72 - ratio * 70;
+function renderSunflower() {
+  refreshCanvas(sfCanvas, SunflowerState.stageIdx, SunflowerState.moodIdx);
+  const stage = STAGES[SunflowerState.stageIdx];
+  const mood = MOODS[SunflowerState.moodIdx];
+  sunflowerMessage.textContent = `${stage.name} · ${mood.text} (비료 ${SunflowerState.fert}/14개)`;
 
-  sunflower.style.setProperty("--flower-scale", scale.toFixed(2));
-  sunflower.style.setProperty("--flower-drop", `${drop.toFixed(0)}px`);
-
-  if (totalCount === 0) {
-    sunflowerMessage.textContent = "할 일을 추가하고 완료하면 새싹이 자랍니다.";
-  } else if (completedCount === totalCount) {
-    sunflowerMessage.textContent = "오늘의 해바라기가 활짝 피었습니다.";
-  } else {
-    sunflowerMessage.textContent = `완료 ${completedCount}개, 남은 할 일 ${totalCount - completedCount}개`;
+  fertGauge.innerHTML = "";
+  for (let i = 0; i < 14; i++) {
+    const dot = document.createElement("div");
+    Object.assign(dot.style, {
+      width: "14px", height: "14px", borderRadius: "50%",
+      background: i < SunflowerState.fert ? "#1D9E75" : "#ddd",
+      fontSize: "8px", color: "white",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    });
+    dot.textContent = i < SunflowerState.fert ? "✿" : "";
+    fertGauge.appendChild(dot);
   }
-}
-
-function getTodosForSelectedDate() {
-  return todosByDate[selectedDateKey] || [];
-}
-
-function loadTodos() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveTodos() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
 }
 
 function toDateKey(date) {
