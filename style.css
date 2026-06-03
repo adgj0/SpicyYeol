@@ -365,6 +365,27 @@ dday-icon { font-size: 14px; }
 @keyframes popup-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 .check-popup.open { display: flex; }
 
+.check-opt {
+    width: 52px;
+    height: 44px;
+    border: none;
+    background: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.check-opt:not(:last-child) { border-bottom: 1px solid var(--outline); }
+.opt-o { color: #006b25; }
+.opt-o:hover { background: #d6f0de; }
+.opt-tri { color: #705d00; }
+.opt-tri:hover { background: #fff9c4; }
+.opt-x { color: #bc000a; }
+.opt-x:hover { background: #ffdad6; }
+
 /* 팝업 모달 */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 999; }
 .modal-overlay.active { display: flex; }
