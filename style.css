@@ -63,6 +63,17 @@ dday-icon { font-size: 14px; }
 .dday-value { font-size: 13px; font-weight: 700; color: var(--primary); }
 .dday-name { font-size: 11px; color: #333; font-weight: 600; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+.dday-set-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #888;
+    margin-left: auto;
+    padding: 0 2px;
+    line-height: 1;
+}
+.dday-set-btn:hover { color: var(--primary); }
 
 .urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
 .banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
