@@ -178,6 +178,37 @@ dday-icon { font-size: 14px; }
 .sub-status-tabs { display: flex; gap: 8px; }
 .sub-tab { cursor: pointer; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #888;transition: all 0.15s; }
 .sub-tab.active { background: #ffffff; color: var(--on-surface); border: 1px solid var(--outline); }
+
+.sub-status-tabs { display: flex; gap: 8px; }
+.sub-tab {
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    transition: all 0.15s;
+}
+.sub-tab.active { background: #ffffff; color: var(--on-surface); border: 1px solid var(--outline); }
+
+/* 일정 추가 인라인 버튼 */
+.btn-add-task-inline {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+}
+.btn-add-task-inline:hover { opacity: 0.85; }
+
+
+
+
 #filter-category { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--outline); }
 
 .priority-block { margin-bottom: 24px; background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--outline); }
