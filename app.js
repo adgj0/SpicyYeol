@@ -1,11 +1,20 @@
 class TaskManager {
     constructor() {
-        this.TASK_KEY = 'sf_tasks_only';
-        this.COIN_KEY = 'sf_coins_shared';
+        this.TASK_KEY  = 'sf_tasks_only';
+        this.COIN_KEY  = 'sf_coins_shared';
+        this.DDAY_KEY  = 'sf_ddays';
 
-        this.tasks = JSON.parse(localStorage.getItem(this.TASK_KEY)) || [];
-        this.coins = parseInt(localStorage.getItem(this.COIN_KEY)) || 0;
+        this.tasks   = JSON.parse(localStorage.getItem(this.TASK_KEY))  || [];
+        this.coins   = parseInt(localStorage.getItem(this.COIN_KEY))    || 0;
+        this.ddays   = JSON.parse(localStorage.getItem(this.DDAY_KEY))  || [];
+        this.activeDdayId = null;
+
         this.currentFilterStatus = 'all';
+        this.editMode            = false;
+        this.selectedIds         = new Set();
+
+        // 체크팝업 현재 열려있는 task id
+        this._checkTargetId = null;
     }
 
     save() {
