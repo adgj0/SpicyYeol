@@ -95,17 +95,24 @@
                 </div>
             </section>
 
+             <!-- Edit 모드 액션 바 -->
+            <div class="edit-action-bar" id="edit-action-bar" style="display:none;">
+                <span class="selected-count-label"><span id="selected-count">0</span>개 선택됨</span>
+                <button class="btn-postpone" id="btn-postpone" onclick="app.openPostponeModal()">📅 미루기</button>
+                <button class="btn-cancel-edit" onclick="app.toggleEditMode()">취소</button>
+            </div>
+
                 <section class="task-priority-groups">
                     <div class="priority-block">
-                        <div class="priority-title high">🔥 [HIGH] Priority</div>
+                        <div class="priority-title high">🔥 중요도⭐⭐⭐</div>
                         <ul id="list-high" class="task-list-ul"></ul>
                     </div>
                     <div class="priority-block">
-                        <div class="priority-title medium">⚡ [MIDDLE] Priority</div>
+                        <div class="priority-title medium">⚡ 중요도 ⭐⭐y</div>
                         <ul id="list-medium" class="task-list-ul"></ul>
                     </div>
                     <div class="priority-block">
-                        <div class="priority-title low">🔽 [LOW] Priority</div>
+                        <div class="priority-title low">🔽 중요도⭐</div>
                         <ul id="list-low" class="task-list-ul"></ul>
                     </div>
                 </section>
@@ -113,7 +120,7 @@
 
             <div id="view-sunflower" class="tab-view" style="display:none;">
                 <div class="team-placeholder" style="height: 400px;">
-                    <h3>🌻 [팀원 C 담당]</h3>
+                    <h3>🌻 [C 파트 담당]</h3>
                     <p>해바라기 룸, 상점, 옷장, 로그 구현 영역</p>
                 </div>
             </div>
