@@ -304,3 +304,77 @@ class TaskManager {
         }
     }
 
+ /* ─────────────────── HELPERS ─────────────────── */
+    _daysLeft(dateStr) {
+        const now   = new Date(); now.setHours(0,0,0,0);
+        const due   = new Date(dateStr);
+        return Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+    }
+
+    /* ─────────────────── RENDER ─────────────────── */
+    render() {
+        document.getElementById('coin-count').innerText = this.coins;
+
+        const lists = {
+            high:   document.getElementById('list-high'),
+            medium: document.getElementById('list-medium'),
+            low:    document.getElementById('list-low'),
+        };
+        Object.values(lists).forEach(el => el.innerHTML = '');
+
+        const selectedCategory = document.getElementById('filter-category').value;
+        const catMap = { study: '학업', personal: '개인', team: '팀플', work: '업무' };
+
+        /* ── URGENT BANNERS ── */
+        const red7   = [];
+        const yellow10 = [];
+
+        this.tasks.forEach(task => {
+            if (task.status === 'done') return;
+            const dl = this._daysLeft(task.date);
+            if (dl >= 0 && dl <= 7)  red7.push({ ...task, dl });
+            else if (dl >= 0 && dl <= 10) yellow10.push({ ...task, dl });
+        });
+
+        // 가까운 순 정렬
+        red7.sort((a, b) => a.dl - b.dl);
+        yellow10.sort((a, b) => a.dl - b.dl);
+
+        const bannersEl = document.getElementById('urgent-banners');
+        bannersEl.innerHTML = '';
+
+        // 빨간 배너 (D-7)
+        if (red7.length) {
+            const div = document.createElement('div');
+            div.className = 'banner banner-red';
+            div.innerHTML = `
+                <div class="banner-tasks-list">
+                    ${red7.map(t => `
+                        <div class="banner-task-chip">
+                            <span>${t.title}</span>
+                            <span class="banner-task-d">D-${t.dl}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <span class="banner-icon-big">🚨</span>
+            `;
+            bannersEl.appendChild(div);
+        }
+
+        // 노란 배너 (D-10 ~ D-8)
+        if (yellow10.length) {
+            const div = document.createElement('div');
+            div.className = 'banner banner-yellow';
+            div.innerHTML = `
+                <div class="banner-tasks-list">
+                    ${yellow10.map(t => `
+                        <div class="banner-task-chip">
+                            <span>${t.title}</span>
+                            <span class="banner-task-d">D-${t.dl}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <span class="banner-icon-big">⚠️</span>
+            `;
+            bannersEl.appendChild(div);
+        }
