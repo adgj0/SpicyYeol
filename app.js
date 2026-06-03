@@ -159,3 +159,32 @@ class TaskManager {
         });
         this.render();
     }
+
+        /* ─────────────────── EDIT MODE ─────────────────── */
+    toggleEditMode() {
+        this.editMode = !this.editMode;
+        this.selectedIds.clear();
+
+        const btn = document.getElementById('btn-edit-mode');
+        const bar = document.getElementById('edit-action-bar');
+
+        btn.classList.toggle('active', this.editMode);
+        bar.style.display = this.editMode ? 'flex' : 'none';
+        this._updateSelectedCount();
+        this.render();
+    }
+
+    toggleSelectTask(id) {
+        if (this.selectedIds.has(id)) {
+            this.selectedIds.delete(id);
+        } else {
+            this.selectedIds.add(id);
+        }
+        this._updateSelectedCount();
+        this.render();
+    }
+
+    _updateSelectedCount() {
+        document.getElementById('selected-count').textContent = this.selectedIds.size;
+    }
+
