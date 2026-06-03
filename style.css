@@ -387,16 +387,44 @@ dday-icon { font-size: 14px; }
 .opt-x:hover { background: #ffdad6; }
 
 /* 팝업 모달 */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 999; }
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.4); display: none;
+    justify-content: center; align-items: center; z-index: 999;
+}
 .modal-overlay.active { display: flex; }
-.modal-content { background: white; width: 460px; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.15); overflow: hidden; }
-.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--outline); display: flex; justify-content: space-between; align-items: center; }
+.modal-content {
+    background: white; width: 480px; border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15); overflow: hidden;
+}
+.modal-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--outline);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { font-size: 16px; font-weight: 700; }
 .close-modal-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #666; }
-.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px; font-size: 14px; }
-.form-row { display: flex; gap: 12px; }
-.modal-footer { padding: 12px 20px; background: #f9f9f9; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--outline); }
-.btn-action { padding: 8px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+.modal-footer {
+    padding: 12px 20px; background: #f9f9f9; display: flex;
+    justify-content: flex-end; gap: 8px; border-top: 1px solid var(--outline);
+}
+.btn-action { padding: 8px 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
 .btn-action.primary { background: var(--primary); color: white; }
 .btn-action.secondary { background: #ddd; }
+
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #666; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px; border: 1px solid var(--outline);
+    border-radius: 8px; font-size: 14px; font-family: inherit;
+}
+.form-group textarea { resize: vertical; }
+.form-row { display: flex; gap: 12px; }
+
+/* Detail Modal */
+.detail-field { margin-bottom: 10px; }
+.detail-field label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
+.detail-field .detail-val { font-size: 14px; color: #333; }
+.detail-memo-box {
+    background: #f9f9f9; border: 1px solid var(--outline); border-radius: 8px;
+    padding: 10px; font-size: 13px; color: #555; min-height: 60px; white-space: pre-wrap;
+}
