@@ -268,13 +268,22 @@ dday-icon { font-size: 14px; }
 .priority-title.low { color: var(--tertiary); }
 .task-list-ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 
-
-.task-card { border: 1px solid var(--outline); padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; background: #fff; }
-.task-left-core { display: flex; align-items: center; gap: 12px; }
-.task-title-text { font-size: 16px; font-weight: 600; }
+.task-card {
+    border: 1px solid var(--outline);
+    padding: 12px 14px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+.task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #bbb; }
 .task-card.done-item { background: #f6f3f5; opacity: 0.6; }
 .task-card.done-item .task-title-text { text-decoration: line-through; color: #888; }
 .task-card.failed-item { background: var(--error-container); border-color: #ffb4aa; }
+.task-card.selected-card { border-color: var(--primary); background: #fff5f5; }
 
 .state-selectors { display: flex; gap: 4px; }
 .btn-state { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--outline); background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
