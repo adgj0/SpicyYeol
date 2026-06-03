@@ -77,6 +77,11 @@
                         <span class="sub-tab active" onclick="app.setFilterStatus('전체')">To-Do</span>
                         <span class="sub-tab" onclick="app.setFilterStatus('진행 중')">In Progress</span>
                         <span class="sub-tab" onclick="app.setFilterStatus('완료')">Done</span>
+
+                        <span class="sub-tab active" onclick="app.setFilterStatus('all')">To-Do</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('in_progress')">In Progress</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('done')">Done</span>
+
                     </div>
                     <!-- 일정 추가 버튼 (filter bar 왼쪽) -->
                     <button class="btn-add-task-inline" onclick="app.openModal()">＋ 일정 추가</button>
@@ -108,7 +113,7 @@
                         <ul id="list-high" class="task-list-ul"></ul>
                     </div>
                     <div class="priority-block">
-                        <div class="priority-title medium">⚡ 중요도 ⭐⭐y</div>
+                        <div class="priority-title medium">⚡ 중요도 ⭐⭐</div>
                         <ul id="list-medium" class="task-list-ul"></ul>
                     </div>
                     <div class="priority-block">
@@ -220,7 +225,7 @@
         </div>
     </div>
 </div>
-    
+
     <script src="app.js"></script>
 </body>
 </html>
