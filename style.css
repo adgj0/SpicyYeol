@@ -285,6 +285,20 @@ dday-icon { font-size: 14px; }
 .task-card.failed-item { background: var(--error-container); border-color: #ffb4aa; }
 .task-card.selected-card { border-color: var(--primary); background: #fff5f5; }
 
+.multi-select-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--outline);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+.multi-select-circle.checked { background: var(--primary); border-color: var(--primary); color: white; font-size: 11px; }
+
+
 .state-selectors { display: flex; gap: 4px; }
 .btn-state { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--outline); background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
 .badge-cat { font-size: 10px; font-weight: 700; background: #eee; padding: 2px 6px; border-radius: 4px; color: #555; }
