@@ -127,17 +127,18 @@
         </div>
     </div>
 
+    <!-- 일정 추가/ 편집 UI -->
     <div id="task-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📝 Add Task</h3>
+                <h3 id="modal-title">📝 일정 추가</h3>
                 <button class="close-modal-btn" onclick="app.closeModal()">✕</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="task-id">
                 <div class="form-group">
                     <label>Task Title</label>
-                    <input type="text" id="task-title" placeholder="할 일 제목">
+                    <input type="text" id="task-title" placeholder="할 일 작성">
                 </div>
                 <div class="form-row">
                     <div class="form-group" style="flex:1;">
