@@ -4,7 +4,6 @@ const SunflowerPanel = {
   _isOpen: false,
 
   init() {
-    // 딤 배경
     this._dim = document.createElement("div");
     Object.assign(this._dim.style, {
       position: "fixed", inset: "0",
@@ -14,7 +13,6 @@ const SunflowerPanel = {
     this._dim.addEventListener("click", () => this.close());
     document.body.appendChild(this._dim);
 
-    // 패널
     this._panel = document.createElement("div");
     Object.assign(this._panel.style, {
       position: "fixed", top: "0", right: "0", bottom: "0",
@@ -67,6 +65,33 @@ const SunflowerPanel = {
     `;
     this._panel.appendChild(main);
 
+    // ✅ 인벤토리 & 비료 주기 버튼
+    const inv = document.createElement("div");
+    inv.style.padding = "16px 20px 0";
+    inv.innerHTML = `
+      <div style="font-size:12px;color:#888;margin-bottom:8px">보유 비료</div>
+      <div style="display:flex;align-items:center;gap:12px;background:#f5f5f0;border-radius:10px;padding:12px 14px">
+        <div style="font-size:24px">🌿</div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#1D9E75">${s.inventory}개</div>
+          <div style="font-size:11px;color:#888">보유 중</div>
+        </div>
+        <button id="sf-give-btn" style="
+          margin-left:auto;
+          background:${s.inventory > 0 ? '#1D9E75' : '#ddd'};
+          color:white;border:none;border-radius:8px;
+          padding:8px 14px;font-size:13px;cursor:${s.inventory > 0 ? 'pointer' : 'not-allowed'};
+        ">비료 주기</button>
+      </div>
+    `;
+    this._panel.appendChild(inv);
+    const giveBtn = inv.querySelector("#sf-give-btn");
+    if (s.inventory > 0) {
+      giveBtn.addEventListener("click", () => {
+        SunflowerState.giveFertilizer(1);
+      });
+    }
+
     // 비료 게이지
     const gauge = document.createElement("div");
     gauge.style.padding = "16px 20px 0";
@@ -79,7 +104,7 @@ const SunflowerPanel = {
       </div>
     `).join("");
     gauge.innerHTML = `
-      <div style="font-size:12px;color:#888;margin-bottom:8px">비료 현황</div>
+      <div style="font-size:12px;color:#888;margin-bottom:8px">해바라기 비료 현황</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">${dots}</div>
       <div style="height:6px;border-radius:3px;background:#ddd;overflow:hidden">
         <div style="height:100%;border-radius:3px;background:#1D9E75;width:${(s.fert/14)*100}%;transition:width .5s ease"></div>
@@ -91,7 +116,9 @@ const SunflowerPanel = {
     // 성장 단계
     const stageRow = document.createElement("div");
     stageRow.style.padding = "16px 20px 0";
-    const stageCards = STAGES.map((st, i) => {
+    const stageWrap = document.createElement("div");
+    Object.assign(stageWrap.style, { display: "flex", gap: "5px" });
+    STAGES.forEach((st, i) => {
       const card = document.createElement("div");
       Object.assign(card.style, {
         flex: "1", border: i === s.stageIdx ? "1.5px solid #1D9E75" : "0.5px solid #ddd",
@@ -105,11 +132,8 @@ const SunflowerPanel = {
       label.style.cssText = `font-size:9px;color:${i === s.stageIdx ? "#1D9E75" : "#888"}`;
       label.textContent = st.name;
       card.appendChild(label);
-      return card;
+      stageWrap.appendChild(card);
     });
-    const stageWrap = document.createElement("div");
-    Object.assign(stageWrap.style, { display: "flex", gap: "5px" });
-    stageCards.forEach(c => stageWrap.appendChild(c));
     stageRow.innerHTML = `<div style="font-size:12px;color:#888;margin-bottom:8px">성장 단계</div>`;
     stageRow.appendChild(stageWrap);
     this._panel.appendChild(stageRow);
