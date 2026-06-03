@@ -82,13 +82,18 @@ class TaskManager {
 
     /* ─────────────────── DETAIL MODAL ─────────────────── */
     openDetailModal(id) {
-        if (this.editMode) return; // Edit 모드에서는 열지 않음
+        if (this.editMode) return;
         const t = this.tasks.find(t => t.id == id);
         if (!t) return;
 
         const catMap = { study: '학업', personal: '개인', team: '팀플', work: '업무' };
         const priMap = { high: '🔥 HIGH', medium: '⚡ MIDDLE', low: '🔽 LOW' };
         const daysLeft = this._daysLeft(t.date);
+
+        // 💡 결과 텍스트 변환 로직
+        let resText = '';
+        if (t.result === 'O') resText = '성공';
+        else if (t.result === 'X') resText = '실패';
 
         document.getElementById('detail-modal-body').innerHTML = `
             <div class="detail-field"><label>제목</label><div class="detail-val" style="font-size:16px;font-weight:700;">${t.title}</div></div>
