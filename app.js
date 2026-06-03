@@ -104,6 +104,7 @@ class TaskManager {
             <div class="detail-field"><label>세부 메모</label><div class="detail-memo-box">${t.memo || '(메모 없음)'}</div></div>
         `;
 
+
         document.getElementById('detail-edit-btn').onclick = () => {
             this.closeDetailModal();
             this.openModal(id);
@@ -422,7 +423,7 @@ markTaskState(id, clickType) {
             else if (task.result === 'X')   cbClass = 'checked-X';
 
             const cbContent = task.result === 'O' ? 'O' : task.result === 'triangle' ? '△' : task.result === 'X' ? 'X' : '';
-            
+
             let resultText = '';
             if (task.result === 'O') resultText = '성공';
             else if (task.result === 'X') resultText = '실패';
@@ -483,7 +484,6 @@ const app = new TaskManager();
 
 window.onload = () => {
     app.render();
-    app.initCalendar();
     app.initDday();
     app.renderDdays();
 
