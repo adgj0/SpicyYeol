@@ -1,0 +1,76 @@
+:root {
+    --surface: #fcf8fb; --outline: #dcd9dc; --on-surface: #1b1b1d;
+    --primary: #bc000a; --primary-container: #e2241f; --secondary: #705d00;
+    --secondary-container: #fdd404; --tertiary: #006b25; --error-container: #ffdad6;
+    --sidebar-width:16.66vw; <!-- 사이드바 넓이 넓히기 -->
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--surface); color: var(--on-surface); height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; height: 100vh; width: 100vw; }
+
+.sidebar {
+    width: 260px; background: #ffffff; border-right: 1px solid var(--outline);
+    padding: 24px; display: flex; flex-direction: column; gap: 24px;
+}
+.sidebar-brand { font-size: 22px; font-weight: 700; color: var(--primary); }
+
+.btn-add-global { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 24px; font-weight: bold; cursor: pointer; }
+
+/* 팀원들 작업 구역 가이드 박스 */
+.team-placeholder {
+    border: 2px dashed #aaa; background: #f9f9f9; padding: 20px;
+    border-radius: 12px; text-align: center; color: #888; display: flex;
+    flex-direction: column; justify-content: center; flex: 1;
+}
+
+.main-content { flex: 1; display: flex; flex-direction: column; padding: 32px; overflow-y: auto; }
+.main-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--outline); padding-bottom: 16px; margin-bottom: 24px; }
+.nav-tabs { display: flex; gap: 24px; }
+.tab-item { font-size: 22px; font-weight: 600; cursor: pointer; }
+.tab-item.active { color: var(--on-surface); font-weight: 700; font-size: 24px; }
+.widget-coin { background: var(--secondary-container); padding: 8px 16px; border-radius: 20px; font-weight: bold; }
+
+.urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
+.banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
+.banner h3 { font-size: 18px; margin-bottom: 4px; }
+
+.filter-control-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.sub-status-tabs { display: flex; gap: 16px; }
+.sub-tab { cursor: pointer; padding: 6px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #888; }
+.sub-tab.active { background: #ffffff; color: var(--on-surface); border: 1px solid var(--outline); }
+#filter-category { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--outline); }
+
+.priority-block { margin-bottom: 24px; background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--outline); }
+.priority-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+.priority-title.high { color: var(--primary); }
+.priority-title.medium { color: var(--secondary); }
+.priority-title.low { color: var(--tertiary); }
+.task-list-ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.task-card { border: 1px solid var(--outline); padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; background: #fff; }
+.task-left-core { display: flex; align-items: center; gap: 12px; }
+.task-title-text { font-size: 16px; font-weight: 600; }
+.task-card.done-item { background: #f6f3f5; opacity: 0.6; }
+.task-card.done-item .task-title-text { text-decoration: line-through; color: #888; }
+.task-card.failed-item { background: var(--error-container); border-color: #ffb4aa; }
+
+.state-selectors { display: flex; gap: 4px; }
+.btn-state { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--outline); background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+.badge-cat { font-size: 10px; font-weight: 700; background: #eee; padding: 2px 6px; border-radius: 4px; color: #555; }
+
+/* 팝업 모달 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 999; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: white; width: 460px; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.15); overflow: hidden; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--outline); display: flex; justify-content: space-between; align-items: center; }
+.close-modal-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #666; }
+.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px; font-size: 14px; }
+.form-row { display: flex; gap: 12px; }
+.modal-footer { padding: 12px 20px; background: #f9f9f9; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--outline); }
+.btn-action { padding: 8px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+.btn-action.primary { background: var(--primary); color: white; }
+.btn-action.secondary { background: #ddd; }
