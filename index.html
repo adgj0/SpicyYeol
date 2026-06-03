@@ -1,80 +1,70 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>날짜별 투두리스트</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>날짜별 투두리스트</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app-shell">
+<main class="app-shell">
     <section class="calendar-panel" aria-label="달력">
-      <div class="panel-heading">
-        <button class="icon-button" id="prevMonth" type="button" aria-label="이전 달">‹</button>
-        <h1 id="currentMonth">2026년 6월</h1>
-        <button class="icon-button" id="nextMonth" type="button" aria-label="다음 달">›</button>
-      </div>
+        <div class="panel-heading">
+            <button class="icon-button" id="prevMonth" type="button" aria-label="이전 달">‹</button>
+            <h1 id="currentMonth">2026년 6월</h1>
+            <button class="icon-button" id="nextMonth" type="button" aria-label="다음 달">›</button>
+        </div>
 
-      <div class="weekday-grid" aria-hidden="true">
-        <span>일</span>
-        <span>월</span>
-        <span>화</span>
-        <span>수</span>
-        <span>목</span>
-        <span>금</span>
-        <span>토</span>
-      </div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="weekday-grid" aria-hidden="true">
+            <span>일</span>
+            <span>월</span>
+            <span>화</span>
+            <span>수</span>
+            <span>목</span>
+            <span>금</span>
+            <span>토</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
     </section>
 
     <section class="todo-panel" aria-label="투두리스트">
-      <div class="selected-date">
-        <p>선택한 날짜</p>
-        <h2 id="selectedDateLabel"></h2>
-      </div>
-
-      <form class="todo-form" id="todoForm">
-        <input id="todoInput" type="text" placeholder="할 일을 입력하세요" autocomplete="off" required>
-        <button type="submit">추가</button>
-      </form>
-
-      <section class="todo-list-section" aria-label="선택 날짜의 할 일">
-        <div class="section-title">
-          <h3>오늘의 체크리스트</h3>
-          <span id="todoCount">0개</span>
+        <div class="selected-date">
+            <p>선택한 날짜</p>
+            <h2 id="selectedDateLabel"></h2>
         </div>
-        <ul class="todo-list" id="todoList"></ul>
-        <p class="empty-state" id="emptyState">이 날짜에는 아직 할 일이 없습니다.</p>
-      </section>
 
-      <section class="sunflower-section" aria-label="해바라기 키우기">
-        <div>
-          <h3>해바라기 키우기</h3>
-          <p id="sunflowerMessage">할 일을 완료하면 해바라기가 자랍니다.</p>
-        </div>
-        <div class="sunflower-garden" id="sunflowerGarden">
-          <div class="sunflower" id="sunflower">
-            <div class="flower-head">
-              <span class="petal petal-1"></span>
-              <span class="petal petal-2"></span>
-              <span class="petal petal-3"></span>
-              <span class="petal petal-4"></span>
-              <span class="petal petal-5"></span>
-              <span class="petal petal-6"></span>
-              <span class="petal petal-7"></span>
-              <span class="petal petal-8"></span>
-              <span class="flower-center"></span>
+        <form class="todo-form" id="todoForm">
+            <input id="todoInput" type="text" placeholder="할 일을 입력하세요" autocomplete="off" required>
+            <button type="submit">추가</button>
+        </form>
+
+        <section class="todo-list-section" aria-label="선택 날짜의 할 일">
+            <div class="section-title">
+                <h3>오늘의 체크리스트</h3>
+                <span id="todoCount">0개</span>
             </div>
-            <div class="stem"></div>
-            <span class="leaf leaf-left"></span>
-            <span class="leaf leaf-right"></span>
-          </div>
-          <div class="soil"></div>
-        </div>
-      </section>
-    </section>
-  </main>
+            <ul class="todo-list" id="todoList"></ul>
+            <p class="empty-state" id="emptyState">이 날짜에는 아직 할 일이 없습니다.</p>
+        </section>
 
-  <script src="script.js"></script>
+            <section class="sunflower-section" aria-label="해바라기 키우기">
+                <div>
+                    <h3>해바라기 키우기</h3>
+                    <button onclick="SunflowerPanel.open()" style="margin-top:8px;padding:6px 12px;background:#1D9E75;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;">🌻 해바라기 보기</button>
+                    <p id="sunflowerMessage">할 일을 완료하면 해바라기가 자랍니다.</p>
+                    <div id="fertGauge" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px"></div>
+                </div>
+                <div class="sunflower-garden" id="sunflowerGarden"></div>
+            </section>
+        </section>
+    </main>
+
+    <script src="sunflower/sunflowerConstants.js"></script>
+    <script src="sunflower/sunflowerDrawUtils.js"></script>
+    <script src="sunflower/SunflowerCanvas.js"></script>
+    <script src="sunflower/SunflowerState.js"></script>
+    <script src="sunflower/SunflowerNavIcon.js"></script>
+    <script src="sunflower/SunflowerPanel.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
