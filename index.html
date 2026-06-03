@@ -200,6 +200,27 @@
     <button class="check-opt opt-x" data-val="X">X</button>
     <button class="check-opt opt-due" data-val="진행 중">진행중 </button>
 </div>
+
+    <!-- ===== POSTPONE MODAL ===== -->
+<div id="postpone-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width:360px;">
+        <div class="modal-header">
+            <h3>📅 미루기</h3>
+            <button class="close-modal-btn" onclick="app.closePostponeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>새로운 마감일</label>
+                <input type="date" id="postpone-date">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-action secondary" onclick="app.closePostponeModal()">취소</button>
+            <button class="btn-action primary" onclick="app.applyPostpone()">적용</button>
+        </div>
+    </div>
+</div>
+    
     <script src="app.js"></script>
 </body>
 </html>
