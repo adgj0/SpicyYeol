@@ -171,7 +171,9 @@ dday-icon { font-size: 14px; }
 
 .banner-icon-big { font-size: 28px; margin-left: 16px; }
 
-.filter-control-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.filter-control-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap:12px; }
+.filter-left { display: flex; align-items: center; gap: 12px; }
+.filter-right { display: flex; align-items: center; gap: 8px; }
 .sub-status-tabs { display: flex; gap: 16px; }
 .sub-tab { cursor: pointer; padding: 6px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #888; }
 .sub-tab.active { background: #ffffff; color: var(--on-surface); border: 1px solid var(--outline); }
