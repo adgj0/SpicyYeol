@@ -59,13 +59,17 @@ const SunflowerPanel = {
     });
     const mainCanvas = createSunflowerCanvas(s.stageIdx, s.moodIdx, 120);
     main.appendChild(mainCanvas);
-    main.innerHTML += `
-      <div style="margin-top:10px;font-weight:600;font-size:17px;color:#2e4a0e">${stage.name}</div>
-      <div style="margin-top:6px;font-size:12px;font-weight:500;background:${mood.bg};color:${mood.color};padding:3px 12px;border-radius:20px">
-        ${mood.text} · ${mood.label}
-      </div>
-    `;
-    this._panel.appendChild(main);
+    const stageLabel = document.createElement("div");
+    stageLabel.style.cssText = "margin-top:10px;font-weight:600;font-size:17px;color:#2e4a0e";
+    stageLabel.textContent = stage.name;
+    main.appendChild(stageLabel);
+
+    const moodBadge = document.createElement("div");
+    moodBadge.style.cssText = `margin-top:6px;font-size:12px;font-weight:500;background:${mood.bg};color:${mood.color};padding:3px 12px;border-radius:20px`;
+    moodBadge.textContent = `${mood.text} · ${mood.label}`;
+    main.appendChild(moodBadge);
+
+this._panel.appendChild(main);
 
     // 비료 게이지
     const gauge = document.createElement("div");
