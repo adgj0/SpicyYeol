@@ -176,6 +176,23 @@
         </div>
     </div>
 
+
+    <!-- ===== TASK DETAIL MODAL ===== -->
+<div id="detail-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📋 일정 상세</h3>
+            <button class="close-modal-btn" onclick="app.closeDetailModal()">✕</button>
+        </div>
+        <div class="modal-body" id="detail-modal-body">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-action secondary" onclick="app.closeDetailModal()">닫기</button>
+            <button class="btn-action primary" id="detail-edit-btn">✏️ 수정</button>
+        </div>
+    </div>
+</div>
+
     <script src="app.js"></script>
 </body>
 </html>
