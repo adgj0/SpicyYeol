@@ -298,6 +298,30 @@ dday-icon { font-size: 14px; }
 }
 .multi-select-circle.checked { background: var(--primary); border-color: var(--primary); color: white; font-size: 11px; }
 
+.task-checkbox-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+.task-checkbox {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 2px solid var(--outline);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.task-checkbox:hover { border-color: var(--primary); background: #fff5f5; }
+.task-checkbox.checked-O { border-color: #006b25; background: #d6f0de; color: #006b25; }
+.task-checkbox.checked-triangle { border-color: #705d00; background: #fff9c4; color: #705d00; }
+.task-checkbox.checked-X { border-color: #bc000a; background: #ffdad6; color: #bc000a; }
+
 
 .state-selectors { display: flex; gap: 4px; }
 .btn-state { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--outline); background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
