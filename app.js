@@ -188,3 +188,28 @@ class TaskManager {
         document.getElementById('selected-count').textContent = this.selectedIds.size;
     }
 
+
+       /* ─────────────────── POSTPONE ─────────────────── */
+    openPostponeModal() {
+        if (this.selectedIds.size === 0) return alert('미룰 일정을 선택해주세요.');
+        document.getElementById('postpone-modal').classList.add('active');
+    }
+
+    closePostponeModal() {
+        document.getElementById('postpone-modal').classList.remove('active');
+    }
+
+    applyPostpone() {
+        const newDate = document.getElementById('postpone-date').value;
+        if (!newDate) return alert('날짜를 선택해주세요.');
+
+        this.selectedIds.forEach(id => {
+            const t = this.tasks.find(t => t.id == id);
+            if (t) { t.date = newDate; t.status = 'before'; t.result = null; }
+        });
+
+        this.selectedIds.clear();
+        this.closePostponeModal();
+        this.toggleEditMode(); // Edit 모드 종료
+        this.save();
+    }
