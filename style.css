@@ -207,9 +207,52 @@ dday-icon { font-size: 14px; }
 .btn-add-task-inline:hover { opacity: 0.85; }
 
 
+#filter-category { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--outline); font-size:13px; }
 
+/* Edit 버튼 */
+.btn-edit-mode {
+    background: white;
+    border: 1px solid var(--outline);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-edit-mode:hover, .btn-edit-mode.active { background: #333; color: white; border-color: #333; }
 
-#filter-category { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--outline); }
+/* Edit 모드 액션 바 */
+.edit-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 10px 16px;
+    background: #fff3cd;
+    border-radius: 10px;
+    border: 1px solid #ffc107;
+}
+.selected-count-label { font-size: 13px; font-weight: 600; color: #333; margin-right: auto; }
+.btn-postpone {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-cancel-edit {
+    background: #ddd;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
 .priority-block { margin-bottom: 24px; background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--outline); }
 .priority-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
