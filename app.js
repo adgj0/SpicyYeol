@@ -141,15 +141,23 @@ class TaskManager {
         this.markTaskState(id, val);
     }
 
-    markTaskState(id, clickType) {
+markTaskState(id, clickType) {
         const task = this.tasks.find(t => t.id == id);
         if (!task) return;
 
-        task.status = 'done';
-        task.result = clickType;
+        if (clickType === '진행 중') {
+            // '진행 중'을 누르면 다시 원래 상태로 되돌림
+            task.status = 'before';
+            task.result = null;
+        } else {
+            // O, X, 세모를 누르면 완료 처리
+            task.status = 'done';
+            task.result = clickType;
 
-        if (clickType === 'O' || clickType === 'triangle') {
-            this.coins += 1;
+            // O나 세모일 때만 코인 추가
+            if (clickType === 'O' || clickType === 'triangle') {
+                this.coins += 1;
+            }
         }
         this.save();
     }
