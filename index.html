@@ -62,24 +62,28 @@
         </div>
 
 
-
             <div id="view-todo" class="tab-view active">
-                <section class="urgent-banners">
-                    <div class="banner red-banner">
-                        <div class="banner-info">
-                            <h3>D-7 Tasks</h3>
-                            <p><span id="red-banner-count">0</span> critical missions approaching.</p>
-                        </div>
-                        <span class="banner-icon">!</span>
-                    </div>
-                </section>
 
-                <section class="filter-control-bar">
+            <!-- ===== URGENT BANNERS (D-10 노란색, D-7 빨간색) ===== -->
+            <section class="urgent-banners" id="urgent-banners">
+                <!-- 동적으로 렌더링 -->
+            </section>
+
+            <!-- ===== FILTER BAR ===== -->
+            <section class="filter-control-bar">
+                <!-- 왼쪽: 상태탭 + 추가버튼 -->
+                <div class="filter-left">
                     <div class="sub-status-tabs">
-                        <span class="sub-tab active" onclick="app.setFilterStatus('all')">To-Do</span>
-                        <span class="sub-tab" onclick="app.setFilterStatus('in_progress')">In Progress</span>
-                        <span class="sub-tab" onclick="app.setFilterStatus('done')">Done</span>
+                        <span class="sub-tab active" onclick="app.setFilterStatus('전체')">To-Do</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('진행 중')">In Progress</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('완료')">Done</span>
                     </div>
+                    <!-- 일정 추가 버튼 (filter bar 왼쪽) -->
+                    <button class="btn-add-task-inline" onclick="app.openModal()">＋ 일정 추가</button>
+                </div>
+
+                <!-- 오른쪽: 카테고리 + Edit 버튼 -->
+                <div class="filter-right">
                     <select id="filter-category" onchange="app.render()">
                         <option value="all">All Categories</option>
                         <option value="study">학업</option>
@@ -87,7 +91,9 @@
                         <option value="team">팀플</option>
                         <option value="work">업무</option>
                     </select>
-                </section>
+                    <button class="btn-edit-mode" id="btn-edit-mode" onclick="app.toggleEditMode()">✏️ Edit</button>
+                </div>
+            </section>
 
                 <section class="task-priority-groups">
                     <div class="priority-block">
