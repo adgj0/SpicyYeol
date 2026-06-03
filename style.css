@@ -385,6 +385,8 @@ dday-icon { font-size: 14px; }
 .opt-tri:hover { background: #fff9c4; }
 .opt-x { color: #bc000a; }
 .opt-x:hover { background: #ffdad6; }
+.opt-due { color: #555; }
+.opt-due:hover { background: #eee; }
 
 /* 팝업 모달 */
 .modal-overlay {
