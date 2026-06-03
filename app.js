@@ -103,9 +103,39 @@ class TaskManager {
         document.getElementById('detail-modal').classList.remove('active');
     }
 
+        /* ─────────────────── CHECK POPUP ─────────────────── */
+    openCheckPopup(taskId, checkboxEl) {
+        this._checkTargetId = taskId;
+        const popup = document.getElementById('check-popup');
+        const rect  = checkboxEl.getBoundingClientRect();
+        popup.style.left = rect.right + 6 + 'px';
+        popup.style.top  = rect.top + 'px';
+        popup.classList.add('open');
+
+        // 팝업 외부 클릭시 닫기
+        setTimeout(() => {
+            document.addEventListener('click', this._closeCheckPopupOutside, { once: true });
+        }, 0);
+    }
+
+    _closeCheckPopupOutside = (e) => {
+        const popup = document.getElementById('check-popup');
+        if (!popup.contains(e.target)) {
+            popup.classList.remove('open');
+            this._checkTargetId = null;
+        }
+    };
+
+    selectCheckOption(val) {
+        const id = this._checkTargetId;
+        if (!id) return;
+        document.getElementById('check-popup').classList.remove('open');
+        this.markTaskState(id, val);
+    }
+
     markTaskState(id, clickType) {
         const task = this.tasks.find(t => t.id == id);
-        if(!task) return;
+        if (!task) return;
 
         task.status = 'done';
         task.result = clickType;
