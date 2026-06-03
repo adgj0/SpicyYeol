@@ -145,3 +145,17 @@ class TaskManager {
         }
         this.save();
     }
+
+
+        /* ─────────────────── FILTER STATUS ─────────────────── */
+    setFilterStatus(status) {
+        this.currentFilterStatus = status;
+        document.querySelectorAll('.sub-tab').forEach((el, idx) => {
+            el.classList.toggle('active',
+                (status === 'all'        && idx === 0) ||
+                (status === 'in_progress' && idx === 1) ||
+                (status === 'done'       && idx === 2)
+            );
+        });
+        this.render();
+    }
