@@ -112,6 +112,32 @@ dday-icon { font-size: 14px; }
     overflow-y: auto;
 }
 
+.dday-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+}
+.dday-item:hover { border-color: var(--primary); }
+.dday-item.active-dday { border-color: var(--primary); background: #fff5f5; }
+
+.dday-item-name { font-size: 12px; font-weight: 600; }
+.dday-item-val { font-size: 13px; font-weight: 700; color: var(--primary); }
+.dday-item-del {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+}
+.dday-item-del:hover { color: var(--primary); }
+
 .urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
 .banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
 .banner h3 { font-size: 18px; margin-bottom: 4px; }
