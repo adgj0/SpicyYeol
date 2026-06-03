@@ -452,3 +452,21 @@ class TaskManager {
         });
     }
 }
+
+/* ───────────────────── INIT ───────────────────── */
+const app = new TaskManager();
+
+window.onload = () => {
+    app.render();
+    app.initCalendar();
+    app.initDday();
+    app.renderDdays();
+
+    // Check popup 버튼 이벤트
+    document.querySelectorAll('.check-opt').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            app.selectCheckOption(btn.dataset.val);
+        });
+    });
+};
