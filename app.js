@@ -100,7 +100,7 @@ class TaskManager {
             <div class="detail-field"><label>마감일</label><div class="detail-val">📅 ${t.date} (D-${daysLeft < 0 ? 'Over' : daysLeft})</div></div>
             <div class="detail-field"><label>중요도</label><div class="detail-val">${priMap[t.priority]}</div></div>
             <div class="detail-field"><label>카테고리</label><div class="detail-val">${catMap[t.category]}</div></div>
-            ${t.status === 'done' ? `<div class="detail-field"><label>결과</label><div class="detail-val">${t.result} 판정 완료</div></div>` : ''}
+            ${t.status === 'done' && resText ? `<div class="detail-field"><label>결과</label><div class="detail-val">${resText}</div></div>` : ''}
             <div class="detail-field"><label>세부 메모</label><div class="detail-memo-box">${t.memo || '(메모 없음)'}</div></div>
         `;
 
