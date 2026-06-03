@@ -40,7 +40,7 @@ body { background: var(--surface); color: var(--on-surface); height: 100vh; over
 .tab-item { font-size: 22px; font-weight: 600; cursor: pointer; }
 .tab-item.active { color: var(--on-surface); font-weight: 700; font-size: 24px; }
 .header-widgets { display: flex; align-items: center; gap: 12px; position: relative; }
-.widget-coin { background: var(--secondary-container); padding: 8px 16px; border-radius: 20px; font-weight: bold; }
+.widget-coin { background: var(--secondary-container); padding: 8px 16px; border-radius: 20px; font-weight: bold; white-space:nowrap; }
 
 .urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
 .banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
