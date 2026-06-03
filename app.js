@@ -17,6 +17,14 @@ class TaskManager {
         this._checkTargetId = null;
     }
 
+    save() {
+        localStorage.setItem(this.TASK_KEY, JSON.stringify(this.tasks));
+        localStorage.setItem(this.COIN_KEY, this.coins);
+        localStorage.setItem(this.DDAY_KEY, JSON.stringify(this.ddays));
+        this.render();
+        this.renderDdays();
+    }
+
       /* ─────────────────── MODAL (Add / Edit) ─────────────────── */
     openModal(taskId = null) {
         const modal = document.getElementById('task-modal');
