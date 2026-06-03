@@ -138,7 +138,7 @@ dday-icon { font-size: 14px; }
 }
 .dday-item-del:hover { color: var(--primary); }
 
-.urgent-banners { display: flex; gap: 16px; margin-bottom: 24px; }
+.urgent-banners { display: flex; flex_direction: column; gap: 10px; margin-bottom: 20px; }
 .banner { flex: 1; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: white; background: var(--primary-container); }
 .banner h3 { font-size: 18px; margin-bottom: 4px; }
 
