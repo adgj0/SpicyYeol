@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Dashboard </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="logo-icon">🌻</span> Sunflower
+            </div>
+
+            <button class="btn-add-global" onclick="app.openModal()">＋ Add Task</button>
+
+            <div class="team-placeholder">
+                <h3>📅 [달력]</h3>
+                <p>달력 및 7일 요약 위젯 구현 영역</p>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="main-header">
+                <div class="nav-tabs">
+                    <span class="tab-item active">To-Do List</span>
+                    <span class="tab-item inactive" style="color:#ccc;">Sunflower (팀원 C)</span>
+                </div>
+                <div class="header-widgets">
+                    <div class="widget-coin">💰 <span id="coin-count">0</span></div>
+                </div>
+            </header>
+
+            <div id="view-todo" class="tab-view active">
+                <section class="urgent-banners">
+                    <div class="banner red-banner">
+                        <div class="banner-info">
+                            <h3>D-7 Tasks</h3>
+                            <p><span id="red-banner-count">0</span> critical missions approaching.</p>
+                        </div>
+                        <span class="banner-icon">!</span>
+                    </div>
+                </section>
+
+                <section class="filter-control-bar">
+                    <div class="sub-status-tabs">
+                        <span class="sub-tab active" onclick="app.setFilterStatus('all')">To-Do</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('in_progress')">In Progress</span>
+                        <span class="sub-tab" onclick="app.setFilterStatus('done')">Done</span>
+                    </div>
+                    <select id="filter-category" onchange="app.render()">
+                        <option value="all">All Categories</option>
+                        <option value="study">학업</option>
+                        <option value="personal">개인</option>
+                        <option value="team">팀플</option>
+                        <option value="work">업무</option>
+                    </select>
+                </section>
+
+                <section class="task-priority-groups">
+                    <div class="priority-block">
+                        <div class="priority-title high">🔥 [HIGH] Priority</div>
+                        <ul id="list-high" class="task-list-ul"></ul>
+                    </div>
+                    <div class="priority-block">
+                        <div class="priority-title medium">⚡ [MIDDLE] Priority</div>
+                        <ul id="list-medium" class="task-list-ul"></ul>
+                    </div>
+                    <div class="priority-block">
+                        <div class="priority-title low">🔽 [LOW] Priority</div>
+                        <ul id="list-low" class="task-list-ul"></ul>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-sunflower" class="tab-view" style="display:none;">
+                <div class="team-placeholder" style="height: 400px;">
+                    <h3>🌻 [팀원 C 담당]</h3>
+                    <p>해바라기 룸, 상점, 옷장, 로그 구현 영역</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="task-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Add Task</h3>
+                <button class="close-modal-btn" onclick="app.closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="task-title" placeholder="할 일 제목">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Due Date</label>
+                        <input type="date" id="task-date">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Priority</label>
+                        <select id="task-priority">
+                            <option value="high">High</option>
+                            <option value="medium" selected>Middle</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="task-category">
+                        <option value="study">학업</option>
+                        <option value="personal">개인</option>
+                        <option value="team">팀플</option>
+                        <option value="work">업무</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action secondary" onclick="app.closeModal()">Cancel</button>
+                <button class="btn-action primary" onclick="app.saveTask()">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
