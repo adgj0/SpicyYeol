@@ -416,12 +416,16 @@ markTaskState(id, clickType) {
             li.className = `task-card ${isDone ? (isFailed ? 'failed-item' : 'done-item') : ''} ${this.selectedIds.has(task.id) ? 'selected-card' : ''}`;
 
             // 체크박스 상태 클래스
-            let cbClass = '';
+           let cbClass = '';
             if (task.result === 'O')        cbClass = 'checked-O';
             else if (task.result === 'triangle') cbClass = 'checked-triangle';
             else if (task.result === 'X')   cbClass = 'checked-X';
 
             const cbContent = task.result === 'O' ? 'O' : task.result === 'triangle' ? '△' : task.result === 'X' ? 'X' : '';
+            
+            let resultText = '';
+            if (task.result === 'O') resultText = '성공';
+            else if (task.result === 'X') resultText = '실패';
 
             li.innerHTML = `
                 ${this.editMode ? `
@@ -436,7 +440,7 @@ markTaskState(id, clickType) {
                     <span class="task-title-text">${task.title}</span>
                     <span class="task-meta">D-${dl < 0 ? 'Over' : dl}</span>
                 </div>
-                ${isDone ? `<span class="task-done-label">${task.result} 판정 완료</span>` : ''}
+                ${isDone && resultText !== '' ? `<span class="task-done-label">${resultText}</span>` : ''}
             `;
 
             // 체크박스 클릭 → 팝업
