@@ -17,7 +17,7 @@ const STORAGE_KEY = "spicyyeol.todosByDate";
 const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = toDateKey(today);
-let todosByDate = loadTodos();
+let todosByDate = getCalendarTodosByDate();
 
 document.querySelector("#prevMonth").addEventListener("click", () => {
   visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() - 1, 1);
@@ -65,6 +65,7 @@ todoList.addEventListener("change", (event) => {
   });
 
   saveTodos();
+  renderCalendar();
   renderTodoList();
 });
 
@@ -97,11 +98,16 @@ function renderCalendar() {
   for (let index = 0; index < 42; index += 1) {
     const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + index);
     const dateKey = toDateKey(date);
+    const todos = getTodosForCalendarDate(dateKey);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "day-button";
-    button.textContent = date.getDate();
     button.setAttribute("aria-label", formatFullDate(date));
+
+    const dayNumber = document.createElement("span");
+    dayNumber.className = "day-number";
+    dayNumber.textContent = date.getDate();
+    button.appendChild(dayNumber);
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -116,15 +122,17 @@ function renderCalendar() {
       button.setAttribute("aria-current", "date");
     }
 
-    if ((todosByDate[dateKey] || []).length > 0) {
+    if (todos.length > 0) {
       button.classList.add("has-todos");
+      button.setAttribute("aria-label", `${formatFullDate(date)}, 할 일 ${todos.length}개`);
+      button.appendChild(createTodoSummary(todos));
     }
 
     button.addEventListener("click", () => {
       selectedDateKey = dateKey;
       visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
       renderCalendar();
-      renderTodoList();
+      renderTodoListIfReady();
       todoInput.focus();
     });
 
@@ -192,6 +200,52 @@ function renderSunflower() {
   }
 }
 
+function createTodoSummary(todos) {
+  const remainingCount = todos.filter((todo) => !todo.completed).length;
+  const firstOpenTodo = todos.find((todo) => !todo.completed) || todos[0];
+  const wrapper = document.createElement("span");
+  const summary = document.createElement("span");
+  const count = document.createElement("span");
+
+  wrapper.className = "day-todo-wrap";
+  summary.className = "day-todo-summary";
+  summary.textContent = firstOpenTodo.text;
+  count.className = "day-todo-count";
+  count.textContent = remainingCount === 0 ? "완료" : `${remainingCount}개`;
+  wrapper.append(summary, count);
+
+  return wrapper;
+}
+
+function getCalendarTodosByDate() {
+  if (typeof loadTodos === "function") {
+    return loadTodos();
+  }
+
+  if (window.todosByDate && typeof window.todosByDate === "object") {
+    return window.todosByDate;
+  }
+
+  return {};
+}
+
+function getTodosForCalendarDate(dateKey) {
+  const source = window.todosByDate && typeof window.todosByDate === "object"
+    ? window.todosByDate
+    : todosByDate;
+  const todos = source[dateKey];
+
+  return Array.isArray(todos) ? todos : [];
+}
+
+function renderTodoListIfReady() {
+  if (typeof getTodosForSelectedDate === "function") {
+    renderTodoList();
+  } else {
+    selectedDateLabel.textContent = formatFullDate(fromDateKey(selectedDateKey));
+  }
+}
+
 function toDateKey(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -222,4 +276,4 @@ function formatFullDate(date) {
 }
 
 renderCalendar();
-renderTodoList();
+renderTodoListIfReady();

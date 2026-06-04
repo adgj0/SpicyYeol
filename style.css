@@ -118,13 +118,20 @@ button {
 
 .day-button {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
   aspect-ratio: 1;
   min-width: 0;
   border: 1px solid transparent;
   border-radius: 8px;
+  padding: 8px 6px 6px;
   background: #ffffff;
   color: var(--ink);
   font-weight: 700;
+  overflow: hidden;
 }
 
 .day-button:hover {
@@ -154,6 +161,53 @@ button {
   border-radius: 999px;
   background: var(--gold);
   content: "";
+}
+
+.day-number {
+  align-self: flex-start;
+  line-height: 1;
+}
+
+.day-todo-wrap {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-right: 10px;
+  text-align: left;
+}
+
+.day-todo-summary {
+  display: block;
+  overflow: hidden;
+  color: var(--accent-dark);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-todo-count {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 1px 5px;
+  background: rgba(47, 125, 92, 0.12);
+  color: var(--accent-dark);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.day-button.is-selected .day-todo-summary,
+.day-button.is-selected .day-todo-count {
+  color: #ffffff;
+}
+
+.day-button.is-selected .day-todo-count {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .selected-date {
