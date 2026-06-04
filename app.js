@@ -120,6 +120,10 @@ class TaskManager {
             this.openModal(id);
         };
 
+        document.getElementById('detail-delete-btn').onclick = () => {
+            this.deleteTask(id);
+        };
+
         document.getElementById('detail-modal').classList.add('active');
     }
 
