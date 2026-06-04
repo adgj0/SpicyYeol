@@ -175,9 +175,6 @@ dday-icon { font-size: 14px; }
 .filter-left { display: flex; align-items: center; gap: 12px; }
 .filter-right { display: flex; align-items: center; gap: 8px; }
 
-.sub-status-tabs { display: flex; gap: 8px; }
-.sub-tab { cursor: pointer; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #888;transition: all 0.15s; }
-.sub-tab.active { background: #ffffff; color: var(--on-surface); border: 1px solid var(--outline); }
 
 .sub-status-tabs { display: flex; gap: 8px; }
 .sub-tab {
