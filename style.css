@@ -206,7 +206,7 @@ button {
 
 .todo-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 86px;
+  grid-template-columns: minmax(0, 1fr) 86px 86px;
   gap: 10px;
 }
 
