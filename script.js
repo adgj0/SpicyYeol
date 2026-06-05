@@ -289,8 +289,8 @@ if (urgentTodo) {
 
     text.style.color = getDdayColor(todo.daysLeft);
 
-if (todo.daysLeft <= 3) {
-  text.style.fontWeight = "700";
+  if (todo.daysLeft <= 3) {
+    text.style.fontWeight = "700";
 }
 
     const dDay = document.createElement("span");
@@ -298,9 +298,9 @@ if (todo.daysLeft <= 3) {
     dDay.textContent = formatDDay(todo.daysLeft);
 
     if (todo.daysLeft <= 3) {
-  dDay.style.background = "#cc0000";
-  dDay.style.color = "#ffffff";
-}
+      dDay.style.background = "#cc0000";
+      dDay.style.color = "#ffffff";
+    }
     dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
 
     const deleteButton = document.createElement("button");
