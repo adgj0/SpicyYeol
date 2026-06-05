@@ -68,6 +68,7 @@ todoList.addEventListener("change", (event) => {
   });
 
   saveTodos();
+  renderCalendar();
   renderTodoList();
 });
 
@@ -106,31 +107,23 @@ function renderCalendar() {
     button.type = "button";
     button.className = "day-button";
     const todos = todosByDate[dateKey] || [];
+    const activeTodos = todos.filter((todo) => !todo.completed);
 
     const dayNumber = document.createElement("span");
     dayNumber.className = "day-number";
     dayNumber.textContent = date.getDate();
 
-    const todoPreview = document.createElement("span");
-    todoPreview.className = "day-todo-preview";
+    const todoDots = document.createElement("span");
+    todoDots.className = "day-todo-dots";
 
-    todos.slice(0, 2).forEach((todo) => {
-      const todoText = document.createElement("span");
-      todoText.className = "day-todo-text";
-      todoText.classList.toggle("is-complete", todo.completed);
-      todoText.textContent = todo.text;
-      todoPreview.appendChild(todoText);
+    activeTodos.forEach(() => {
+      const dot = document.createElement("span");
+      dot.className = "day-todo-dot";
+      todoDots.appendChild(dot);
     });
 
-    if (todos.length > 2) {
-      const moreText = document.createElement("span");
-      moreText.className = "day-todo-more";
-      moreText.textContent = `+${todos.length - 2}`;
-      todoPreview.appendChild(moreText);
-    }
-
-    button.append(dayNumber, todoPreview);
-    button.setAttribute("aria-label", getCalendarDateLabel(date, todos));
+    button.append(dayNumber, todoDots);
+    button.setAttribute("aria-label", getCalendarDateLabel(date, activeTodos));
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -145,7 +138,7 @@ function renderCalendar() {
       button.setAttribute("aria-current", "date");
     }
 
-    if (todos.length > 0) {
+    if (activeTodos.length > 0) {
       button.classList.add("has-todos");
     }
 
