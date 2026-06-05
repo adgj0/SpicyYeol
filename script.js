@@ -98,7 +98,7 @@ todoForm.addEventListener("submit", (event) => {
   const newTodo = {
     id: crypto.randomUUID(),
     text,
-    completed: false
+    completed: false,
     priority: selectedPriorityInput.value || "medium"
   };
 
