@@ -58,23 +58,13 @@ class TaskManager {
         document.getElementById('task-memo').value     = '';
     }
 
-    saveTask() {
+saveTask() {
         const id       = document.getElementById('task-id').value;
         const title    = document.getElementById('task-title').value.trim();
         const date     = document.getElementById('task-date').value;
         const priority = document.getElementById('task-priority').value;
         const category = document.getElementById('task-category').value;
         const memo     = document.getElementById('task-memo').value.trim();
-
-        deleteTask(id) {
-        if (!confirm('정말 이 일정을 삭제하시겠습니까?')) return;
-
-        // 해당 id를 가진 일정을 배열에서 빼버림
-        this.tasks = this.tasks.filter(t => t.id != id);
-
-        this.closeDetailModal(); // 모달창 닫기
-        this.save(); // 변경된 상태 저장 및 화면 갱신
-    }
 
         if (!title || !date) return alert('제목과 마감일을 입력해주세요.');
 
@@ -88,6 +78,16 @@ class TaskManager {
         }
         this.closeModal();
         this.save();
+    }
+
+    deleteTask(id) {
+        if (!confirm('정말 이 일정을 삭제하시겠습니까?')) return;
+
+        // 해당 id를 가진 일정을 배열에서 빼버림
+        this.tasks = this.tasks.filter(t => t.id != id);
+
+        this.closeDetailModal(); // 모달창 닫기
+        this.save(); // 변경된 상태 저장 및 화면 갱신
     }
 
     /* ─────────────────── DETAIL MODAL ─────────────────── */
