@@ -51,6 +51,32 @@ let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = toDateKey(today);
 let todosByDate = loadTodos();
 
+priorityBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // 폼 제출 방지
+  priorityDropdown.style.display = priorityDropdown.style.display === "none" ? "block" : "none";
+});
+
+document.addEventListener("click", () => {
+  priorityDropdown.style.display = "none";
+});
+
+const priorityStyleMap = {
+  high: { text: "높음", color: "#bc000a" },
+  medium: { text: "중간", color: "#705d00" },
+  low: { text: "낮음", color: "#006b25" }
+};
+
+priorityOptions.forEach(option => {
+  option.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const val = option.dataset.value;
+    selectedPriorityInput.value = val;
+    priorityBtn.textContent = priorityStyleMap[val].text;
+    priorityBtn.style.color = priorityStyleMap[val].color;
+    priorityDropdown.style.display = "none";
+  });
+});
+
 document.querySelector("#prevMonth").addEventListener("click", () => {
   visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() - 1, 1);
   renderCalendar();
