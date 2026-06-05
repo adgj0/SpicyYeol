@@ -66,9 +66,13 @@ todoList.addEventListener("change", (event) => {
 
     return { ...todo, completed: event.target.checked };
   });
-  if (event.target.checked) {
+  const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+  if (event.target.checked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
     SunflowerState.onTaskComplete(daysLeft);
+    todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
+      t.id === todoId ? { ...t, fertGiven: true } : t
+    );
   }
   saveTodos();
   renderCalendar();
