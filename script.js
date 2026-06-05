@@ -136,10 +136,8 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   renderTodoList();
 });
 
-todoList.addEventListener("change", (event) => {
-  if (!event.target.matches("[data-action='toggle']")) {
-    return;
-  }
+priorityGroupsContainer.addEventListener("change", (event) => {
+  if (!event.target.matches("[data-action='toggle']")) return;
 
   const todoId = event.target.dataset.id;
   // TodoList 표시 개선: 렌더링된 항목의 날짜 키를 기준으로 상태를 갱신합니다.
