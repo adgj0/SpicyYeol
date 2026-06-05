@@ -42,7 +42,7 @@ const SunflowerPanel = {
     header.innerHTML = `
       <div>
         <div style="font-weight:600;font-size:16px;color:#3a2e10">나의 해바라기</div>
-        <div style="font-size:12px;color:#999;margin-top:2px">${stage.name} · 비료 ${s.fert}/14개</div>
+        <div style="font-size:12px;color:#999;margin-top:2px">${stage.name} · 비료 ${s.fert}/14개 · 🌻 ${s.growCount}개 완성</div>
       </div>
       <button id="sf-close-btn" style="background:none;border:none;cursor:pointer;font-size:20px;color:#aaa">✕</button>
     `;
