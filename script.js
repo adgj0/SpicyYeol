@@ -66,7 +66,10 @@ todoList.addEventListener("change", (event) => {
 
     return { ...todo, completed: event.target.checked };
   });
-
+  if (event.target.checked) {
+    const daysLeft = calculateDaysLeftFromToday(todoDateKey);
+    SunflowerState.onTaskComplete(daysLeft);
+  }
   saveTodos();
   renderCalendar();
   renderTodoList();
