@@ -317,7 +317,6 @@ if (todo.daysLeft <= 3) {
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
     item.append(checkbox, text, dDay, deleteButton);
-    todoList.appendChild(item);
   });
 
   renderSunflower();
