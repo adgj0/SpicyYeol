@@ -31,6 +31,16 @@ const todoSectionTitle = document.querySelector(".todo-list-section .section-tit
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
+
+const priorityBtn = document.querySelector("#priorityBtn");
+const priorityDropdown = document.querySelector("#priorityDropdown");
+const priorityOptions = document.querySelectorAll(".priority-option");
+const selectedPriorityInput = document.querySelector("#selectedPriority");
+const todoListHigh = document.querySelector("#todoListHigh");
+const todoListMedium = document.querySelector("#todoListMedium");
+const todoListLow = document.querySelector("#todoListLow");
+const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer");
+
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
 sunflowerGarden.appendChild(sfCanvas);
 SunflowerPanel.init();
