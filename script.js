@@ -104,6 +104,10 @@ todoForm.addEventListener("submit", (event) => {
 
   todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
   todoInput.value = "";
+  selectedPriorityInput.value = "medium";
+  priorityBtn.textContent = "중요도";
+  priorityBtn.style.color = "";
+
   saveTodos();
   renderCalendar();
   renderTodoList();
