@@ -244,15 +244,12 @@ function renderCalendar() {
 
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
- const todos = getAllTodosWithDaysLeft().sort((a, b) => {
+  const todos = getAllTodosWithDaysLeft().sort((a, b) => {
 
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
 
-    if (urgentA !== urgentB) {
-        return urgentA - urgentB;
-    }
-
+    if (urgentA !== urgentB) return urgentA - urgentB;
     return a.daysLeft - b.daysLeft;
 });
 
@@ -316,7 +313,6 @@ if (todo.daysLeft <= 3) {
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
     item.append(checkbox, text, dDay, deleteButton);
-  });
 
   if (todo.daysLeft <= 3) {
       todoListUrgent.appendChild(item);
@@ -329,16 +325,6 @@ if (todo.daysLeft <= 3) {
       } else {
         todoListLow.appendChild(item);
       }
-    }
-  });
-
-  const itemPriority = todo.priority || "medium"; // 예전 데이터는 기본 '중간'으로
-    if (itemPriority === "high") {
-      todoListHigh.appendChild(item);
-    } else if (itemPriority === "medium") {
-      todoListMedium.appendChild(item);
-    } else {
-      todoListLow.appendChild(item);
     }
   });
 
