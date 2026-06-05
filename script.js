@@ -160,6 +160,10 @@ function renderCalendar() {
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
   const todos = getAllTodosWithDaysLeft();
+  const urgentTodo = todos.filter(t => !t.completed).sort((a, b) => a.daysLeft - b.daysLeft)[0];
+  if (urgentTodo) {
+  SunflowerState.updateMoodFromDDay(urgentTodo.daysLeft);
+  }
   const completedCount = todos.filter((todo) => todo.completed).length;
 
   selectedDateLabel.textContent = "전체 TodoList";

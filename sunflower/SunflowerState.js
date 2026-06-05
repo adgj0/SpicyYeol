@@ -43,8 +43,10 @@ const SunflowerState = {
   },
 
   onTaskComplete(daysLeft, wasProcrastinated = false) {
-    if (daysLeft >= 7) this.earnFertilizer(3, "7일 전 완료");
-    else               this.earnFertilizer(1, "기한 내 완료");
+    if (daysLeft >= 7)      this.earnFertilizer(3, "7일 전 완료");
+    else if (daysLeft >= 1) this.earnFertilizer(2, "하루 전 완료");
+    else if (daysLeft === 0) this.earnFertilizer(2, "당일 완료");
+    else                    this.earnFertilizer(1, "마감 후 완료");
     if (wasProcrastinated) this.earnFertilizer(1, "미뤘던 일 완료");
   },
 
