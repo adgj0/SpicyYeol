@@ -36,7 +36,7 @@ const SunflowerState = {
   // wasProcrastinated: 미뤘던 일 여부
   onTaskComplete(daysLeft, wasProcrastinated = false) {
     if (daysLeft >= 7) this.earnFertilizer(3, "7일 전 완료");
-    else               this.earnFertilizer(1, "기한 내 완료");
+    else this.earnFertilizer(1, "기한 내 완료");
     if (wasProcrastinated) this.earnFertilizer(1, "미뤘던 일 완료");
   },
 
@@ -48,12 +48,60 @@ const SunflowerState = {
   },
 };
 
-/*
-  ── 연동 방법 (script.js에서) ──────────────────────────
+// =========================
+// 체크리스트 D-Day 기능
+// =========================
 
-  할일 완료 시:
-  const daysLeft = Math.ceil((new Date(task.deadline) - new Date()) / 86400000);
-  SunflowerState.onTaskComplete(daysLeft, task.wasProcrastinated);
+SunflowerState.tasks = [
+  { id: 1, title: "Docker 시험 공부", deadline: "2026-06-10" },
+  { id: 2, title: "OSS 과제 제출", deadline: "2026-06-07" },
+  { id: 3, title: "GitHub 실습 복습", deadline: "2026-06-08" },
+  { id: 4, title: "발표자료 수정", deadline: "2026-06-15" },
+  { id: 5, title: "논문계획서 정리", deadline: "2026-06-20" },
+];
 
-  ────────────────────────────────────────────────────────
-*/
+SunflowerState.getDaysLeft = function(deadline) {
+  const today = new Date();
+  const due = new Date(deadline);
+
+  today.setHours(0, 0, 0, 0);
+  due.setHours(0, 0, 0, 0);
+
+  return Math.ceil((due - today) / 86400000);
+};
+
+SunflowerState.getDdayText = function(daysLeft) {
+  if (daysLeft > 0) return `D-${daysLeft}`;
+  if (daysLeft === 0) return "D-Day";
+  return `D+${Math.abs(daysLeft)}`;
+};
+
+SunflowerState.getUrgencyColor = function(daysLeft) {
+  if (daysLeft > 7) return "#333333";
+  if (daysLeft <= 0) return "#cc0000";
+
+  const ratio = (7 - daysLeft) / 7;
+
+  const start = [51, 51, 51];
+  const end = [204, 0, 0];
+
+  const r = Math.round(start[0] + (end[0] - start[0]) * ratio);
+  const g = Math.round(start[1] + (end[1] - start[1]) * ratio);
+  const b = Math.round(start[2] + (end[2] - start[2]) * ratio);
+
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+SunflowerState.getSortedTasks = function() {
+  return [...this.tasks].sort((a, b) => {
+    const daysA = this.getDaysLeft(a.deadline);
+    const daysB = this.getDaysLeft(b.deadline);
+
+    const urgentA = daysA <= 3 ? 0 : 1;
+    const urgentB = daysB <= 3 ? 0 : 1;
+
+    if (urgentA !== urgentB) return urgentA - urgentB;
+
+    return daysA - daysB;
+  });
+};

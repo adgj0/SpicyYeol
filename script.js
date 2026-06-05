@@ -1,3 +1,24 @@
+function getDdayColor(daysLeft) {
+
+  if (daysLeft > 7) {
+    return "#111111";
+  }
+
+  if (daysLeft <= 0) {
+    return "#cc0000";
+  }
+
+  const ratio = (7 - daysLeft) / 7;
+
+  const start = [17, 17, 17];
+  const end = [204, 0, 0];
+
+  const r = Math.round(start[0] + (end[0] - start[0]) * ratio);
+  const g = Math.round(start[1] + (end[1] - start[1]) * ratio);
+  const b = Math.round(start[2] + (end[2] - start[2]) * ratio);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
 const calendarGrid = document.querySelector("#calendarGrid");
 const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
@@ -163,8 +184,16 @@ function renderCalendar() {
 
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
-  const todos = getAllTodosWithDaysLeft();
-  const completedCount = todos.filter((todo) => todo.completed).length;
+const todos = getAllTodosWithDaysLeft().sort((a, b) => {
+  const urgentA = a.daysLeft <= 3 ? 0 : 1;
+  const urgentB = b.daysLeft <= 3 ? 0 : 1;
+
+  if (urgentA !== urgentB) {
+    return urgentA - urgentB;
+  }
+
+  return a.daysLeft - b.daysLeft;
+});  const completedCount = todos.filter((todo) => todo.completed).length;
 
   selectedDateLabel.textContent = "전체 TodoList";
   todoSectionTitle.textContent = "전체 체크리스트";
@@ -189,9 +218,20 @@ function renderTodoList() {
     text.className = "todo-text";
     text.textContent = todo.text;
 
+    text.style.color = getDdayColor(todo.daysLeft);
+
+if (todo.daysLeft <= 3) {
+  text.style.fontWeight = "700";
+}
+
     const dDay = document.createElement("span");
     dDay.className = "todo-dday";
     dDay.textContent = formatDDay(todo.daysLeft);
+
+    if (todo.daysLeft <= 3) {
+  dDay.style.background = "#cc0000";
+  dDay.style.color = "#ffffff";
+}
     dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
 
     const deleteButton = document.createElement("button");
