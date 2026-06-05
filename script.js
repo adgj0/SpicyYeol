@@ -99,6 +99,7 @@ todoForm.addEventListener("submit", (event) => {
     id: crypto.randomUUID(),
     text,
     completed: false
+    priority: selectedPriorityInput.value || "medium"
   };
 
   todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
