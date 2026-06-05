@@ -87,8 +87,16 @@ todoList.addEventListener("change", (event) => {
 
     return { ...todo, completed: event.target.checked };
   });
-
+  const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+  if (event.target.checked && !todo.fertGiven) {
+    const daysLeft = calculateDaysLeftFromToday(todoDateKey);
+    SunflowerState.onTaskComplete(daysLeft);
+    todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
+      t.id === todoId ? { ...t, fertGiven: true } : t
+    );
+  }
   saveTodos();
+  renderCalendar();
   renderTodoList();
 });
 
@@ -127,31 +135,23 @@ function renderCalendar() {
     button.type = "button";
     button.className = "day-button";
     const todos = todosByDate[dateKey] || [];
+    const activeTodos = todos.filter((todo) => !todo.completed);
 
     const dayNumber = document.createElement("span");
     dayNumber.className = "day-number";
     dayNumber.textContent = date.getDate();
 
-    const todoPreview = document.createElement("span");
-    todoPreview.className = "day-todo-preview";
+    const todoDots = document.createElement("span");
+    todoDots.className = "day-todo-dots";
 
-    todos.slice(0, 2).forEach((todo) => {
-      const todoText = document.createElement("span");
-      todoText.className = "day-todo-text";
-      todoText.classList.toggle("is-complete", todo.completed);
-      todoText.textContent = todo.text;
-      todoPreview.appendChild(todoText);
+    activeTodos.forEach(() => {
+      const dot = document.createElement("span");
+      dot.className = "day-todo-dot";
+      todoDots.appendChild(dot);
     });
 
-    if (todos.length > 2) {
-      const moreText = document.createElement("span");
-      moreText.className = "day-todo-more";
-      moreText.textContent = `+${todos.length - 2}`;
-      todoPreview.appendChild(moreText);
-    }
-
-    button.append(dayNumber, todoPreview);
-    button.setAttribute("aria-label", getCalendarDateLabel(date, todos));
+    button.append(dayNumber, todoDots);
+    button.setAttribute("aria-label", getCalendarDateLabel(date, activeTodos));
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -166,7 +166,7 @@ function renderCalendar() {
       button.setAttribute("aria-current", "date");
     }
 
-    if (todos.length > 0) {
+    if (activeTodos.length > 0) {
       button.classList.add("has-todos");
     }
 
@@ -184,16 +184,25 @@ function renderCalendar() {
 
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
-const todos = getAllTodosWithDaysLeft().sort((a, b) => {
-  const urgentA = a.daysLeft <= 3 ? 0 : 1;
-  const urgentB = b.daysLeft <= 3 ? 0 : 1;
+ const todos = getAllTodosWithDaysLeft().sort((a, b) => {
 
-  if (urgentA !== urgentB) {
-    return urgentA - urgentB;
-  }
+    const urgentA = a.daysLeft <= 3 ? 0 : 1;
+    const urgentB = b.daysLeft <= 3 ? 0 : 1;
 
-  return a.daysLeft - b.daysLeft;
-});  const completedCount = todos.filter((todo) => todo.completed).length;
+    if (urgentA !== urgentB) {
+        return urgentA - urgentB;
+    }
+
+    return a.daysLeft - b.daysLeft;
+});
+
+const urgentTodo = todos.find(todo => todo.daysLeft <= 3);
+
+if (urgentTodo) {
+    SunflowerState.updateMoodForUrgentTodo();
+}
+
+  const completedCount = todos.filter((todo) => todo.completed).length;
 
   selectedDateLabel.textContent = "전체 TodoList";
   todoSectionTitle.textContent = "전체 체크리스트";

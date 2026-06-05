@@ -42,7 +42,7 @@ const SunflowerPanel = {
         header.innerHTML = `
       <div>
         <div style="font-weight:600;font-size:16px;color:#3a2e10">나의 해바라기</div>
-        <div style="font-size:12px;color:#999;margin-top:2px">${stage.name} · 비료 ${s.fert}/14개</div>
+        <div style="font-size:12px;color:#999;margin-top:2px">${stage.name} · 비료 ${s.fert}/14개 · 🌻 ${s.growCount}개 완성</div>
       </div>
       <button id="sf-close-btn" style="background:none;border:none;cursor:pointer;font-size:20px;color:#aaa">✕</button>
     `;
@@ -149,8 +149,8 @@ const SunflowerPanel = {
       <div style="font-size:12px;color:#888;margin-bottom:8px">비료 획득 방법</div>
       <div style="background:#f5f5f0;border-radius:10px;padding:10px 14px;font-size:12px;color:#555;line-height:1.8">
         <div>🌿 7일 전 완료 → <strong>+3개</strong></div>
-        <div>✅ 기한 내 완료 → <strong>+1개</strong></div>
-        <div>🔄 미뤘던 일 완료 → <strong>+1개</strong></div>
+        <div>✅ 당일/하루 전 완료 → <strong>+2개</strong></div>
+        <div>🔄 마감 후 완료 → <strong>+1개</strong></div>
       </div>
     `;
         this._panel.appendChild(guide);

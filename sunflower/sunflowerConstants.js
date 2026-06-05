@@ -18,8 +18,8 @@ function getStageIndex(fert) {
 }
 
 function getMoodIndex(daysLeft) {
-  if (daysLeft > 7)  return 0;
-  if (daysLeft > 3)  return 1;
-  if (daysLeft > 0)  return 2;
+  if (daysLeft > 7)   return 0;
+  if (daysLeft > 3)   return 1;
+  if (daysLeft >= 0)  return 2;
   return 3;
 }
