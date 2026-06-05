@@ -547,3 +547,30 @@ button {
 .group-low .todo-list {
   margin-top: 8px;
 }
+
+/* ===== 🌟 리스트 내부 스크롤 및 위급 스타일 ===== */
+.priority-groups {
+  max-height: 360px; /* 이 높이를 넘어가면 스크롤이 생깁니다 */
+  overflow-y: auto;
+  padding-right: 8px; /* 스크롤바와 글자 사이 간격 */
+}
+
+/* 스크롤바 디자인 예쁘게 깎기 */
+.priority-groups::-webkit-scrollbar {
+  width: 6px;
+}
+.priority-groups::-webkit-scrollbar-track {
+  background: #f4f1e8;
+  border-radius: 4px;
+}
+.priority-groups::-webkit-scrollbar-thumb {
+  background: #c8bfae;
+  border-radius: 4px;
+}
+.priority-groups::-webkit-scrollbar-thumb:hover {
+  background: #a89f8e;
+}
+
+.group-urgent .todo-list {
+  margin-top: 8px;
+}
