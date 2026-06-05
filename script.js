@@ -320,6 +320,20 @@ if (todo.daysLeft <= 3) {
     item.append(checkbox, text, dDay, deleteButton);
   });
 
+  if (todo.daysLeft <= 3) {
+      todoListUrgent.appendChild(item);
+    } else {
+      const itemPriority = todo.priority || "medium";
+      if (itemPriority === "high") {
+        todoListHigh.appendChild(item);
+      } else if (itemPriority === "medium") {
+        todoListMedium.appendChild(item);
+      } else {
+        todoListLow.appendChild(item);
+      }
+    }
+  });
+
   const itemPriority = todo.priority || "medium"; // 예전 데이터는 기본 '중간'으로
     if (itemPriority === "high") {
       todoListHigh.appendChild(item);
