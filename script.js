@@ -24,7 +24,6 @@ const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const todoForm = document.querySelector("#todoForm");
 const todoInput = document.querySelector("#todoInput");
-const todoList = document.querySelector("#todoList");
 const todoCount = document.querySelector("#todoCount");
 const emptyState = document.querySelector("#emptyState");
 const todoSectionTitle = document.querySelector(".todo-list-section .section-title h3");
@@ -162,10 +161,9 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   renderTodoList();
 });
 
-todoList.addEventListener("click", (event) => {
-  if (!event.target.matches("[data-action='delete']")) {
-    return;
-  }
+priorityGroupsContainer.addEventListener("click", (event) => {
+  if (!event.target.matches("[data-action='delete']")) return;
+
 
   const todoId = event.target.dataset.id;
   // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
