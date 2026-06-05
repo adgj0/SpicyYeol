@@ -421,9 +421,10 @@ markTaskState(id, clickType) {
             const dl = this._daysLeft(task.date);
 
             // 필터
-            if (this.currentFilterStatus === 'in_progress' && task.status !== 'before') return;
-            if (this.currentFilterStatus === 'done'        && task.status !== 'done')   return;
-            if (this.currentFilterStatus === 'all'         && task.status === 'done')   return;
+           // 필터 (To-Do, 진행 중, 완료를 명확하게 3단계로 분리)
+            if (this.currentFilterStatus === 'all' && task.status !== 'before') return;
+            if (this.currentFilterStatus === 'in_progress' && task.status !== 'in_progress') return;
+            if (this.currentFilterStatus === 'done' && task.status !== 'done') return;
             if (selectedCategory !== 'all' && task.category !== selectedCategory)       return;
 
             const li = document.createElement('li');
