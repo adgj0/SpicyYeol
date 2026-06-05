@@ -33,9 +33,16 @@ const SunflowerState = {
     if (this.fert >= 14) {
       this.growCount += 1;
       localStorage.setItem("sf.growCount", this.growCount);
-      this.fert = 0;
-      localStorage.setItem("sf.fert", this.fert);
       this.log.unshift(`🌻 해바라기 완성! (총 ${this.growCount}개째)`);
+      SunflowerPanel.refresh();
+      SunflowerNavIcon.refresh();
+      setTimeout(() => {
+        this.fert = 0;
+        localStorage.setItem("sf.fert", this.fert);
+        SunflowerPanel.refresh();
+        SunflowerNavIcon.refresh();
+      }, 3000);
+      return;
     }
 
     SunflowerPanel.refresh();
