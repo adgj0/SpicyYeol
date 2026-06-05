@@ -6,6 +6,7 @@ const todoInput = document.querySelector("#todoInput");
 const todoList = document.querySelector("#todoList");
 const todoCount = document.querySelector("#todoCount");
 const emptyState = document.querySelector("#emptyState");
+const todoSectionTitle = document.querySelector(".todo-list-section .section-title h3");
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
@@ -56,7 +57,9 @@ todoList.addEventListener("change", (event) => {
   }
 
   const todoId = event.target.dataset.id;
-  todosByDate[selectedDateKey] = getTodosForSelectedDate().map((todo) => {
+  // TodoList 표시 개선: 렌더링된 항목의 날짜 키를 기준으로 상태를 갱신합니다.
+  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map((todo) => {
     if (todo.id !== todoId) {
       return todo;
     }
@@ -74,10 +77,12 @@ todoList.addEventListener("click", (event) => {
   }
 
   const todoId = event.target.dataset.id;
-  todosByDate[selectedDateKey] = getTodosForSelectedDate().filter((todo) => todo.id !== todoId);
+  // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
+  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
 
-  if (todosByDate[selectedDateKey].length === 0) {
-    delete todosByDate[selectedDateKey];
+  if (todosByDate[todoDateKey].length === 0) {
+    delete todosByDate[todoDateKey];
   }
 
   saveTodos();
@@ -157,10 +162,12 @@ function renderCalendar() {
 }
 
 function renderTodoList() {
-  const todos = getTodosForSelectedDate();
+  // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
+  const todos = getAllTodosWithDaysLeft();
   const completedCount = todos.filter((todo) => todo.completed).length;
 
-  selectedDateLabel.textContent = formatFullDate(fromDateKey(selectedDateKey));
+  selectedDateLabel.textContent = "전체 TodoList";
+  todoSectionTitle.textContent = "전체 체크리스트";
   todoCount.textContent = `${completedCount}/${todos.length} 완료`;
   emptyState.classList.toggle("is-visible", todos.length === 0);
   todoList.innerHTML = "";
@@ -175,6 +182,7 @@ function renderTodoList() {
     checkbox.checked = todo.completed;
     checkbox.dataset.action = "toggle";
     checkbox.dataset.id = todo.id;
+    checkbox.dataset.dateKey = todo.dateKey;
     checkbox.setAttribute("aria-label", `${todo.text} 완료`);
 
     const text = document.createElement("span");
@@ -187,6 +195,7 @@ function renderTodoList() {
     deleteButton.textContent = "×";
     deleteButton.dataset.action = "delete";
     deleteButton.dataset.id = todo.id;
+    deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
     item.append(checkbox, text, deleteButton);
@@ -257,7 +266,39 @@ function getCalendarDateLabel(date, todos) {
 }
 
 function getTodosForSelectedDate() {
-  return todosByDate[selectedDateKey] || [];
+  return getTodosForDate(selectedDateKey);
+}
+
+// TodoList 표시 개선: 날짜 키로 항목을 조회하는 공통 함수입니다.
+function getTodosForDate(dateKey) {
+  return todosByDate[dateKey] || [];
+}
+
+// TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
+function calculateDaysLeftFromToday(dateKey) {
+  const selectedDate = fromDateKey(dateKey);
+  const todayDate = fromDateKey(toDateKey(today));
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  return Math.round((selectedDate - todayDate) / millisecondsPerDay);
+}
+
+// TodoList 표시 개선: 특정 날짜의 TodoList 항목에 오늘 기준 남은 일수 정보를 추가합니다.
+function getTodosForDateWithDaysLeft(dateKey) {
+  const daysLeft = calculateDaysLeftFromToday(dateKey);
+
+  return getTodosForDate(dateKey).map((todo) => ({
+    ...todo,
+    dateKey,
+    daysLeft
+  }));
+}
+
+// TodoList 표시 개선: 저장된 모든 날짜의 TodoList 항목을 날짜순으로 모두 모읍니다.
+function getAllTodosWithDaysLeft() {
+  return Object.keys(todosByDate)
+    .sort()
+    .flatMap((dateKey) => getTodosForDateWithDaysLeft(dateKey));
 }
 
 function loadTodos() {
