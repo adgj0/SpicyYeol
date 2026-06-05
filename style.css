@@ -118,13 +118,20 @@ button {
 
 .day-button {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   aspect-ratio: 1;
   min-width: 0;
   border: 1px solid transparent;
   border-radius: 8px;
+  padding: 8px;
   background: #ffffff;
   color: var(--ink);
   font-weight: 700;
+  text-align: left;
+  overflow: hidden;
 }
 
 .day-button:hover {
@@ -154,6 +161,54 @@ button {
   border-radius: 999px;
   background: var(--gold);
   content: "";
+}
+
+.day-number {
+  line-height: 1;
+}
+
+.day-todo-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 0;
+  padding-right: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.day-todo-text,
+.day-todo-more {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-todo-text {
+  color: var(--accent-dark);
+}
+
+.day-button.is-selected .day-todo-text,
+.day-button.is-selected .day-todo-more {
+  color: #ffffff;
+}
+
+.day-button.is-muted .day-todo-text,
+.day-button.is-muted .day-todo-more {
+  color: #8d887f;
+}
+
+.day-todo-text.is-complete {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.day-todo-more {
+  color: var(--muted);
 }
 
 .selected-date {
@@ -240,7 +295,7 @@ button {
 
 .todo-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 34px;
+  grid-template-columns: 28px minmax(0, 1fr) auto 34px;
   align-items: center;
   gap: 10px;
   min-height: 48px;
@@ -264,6 +319,25 @@ button {
 .todo-item.is-complete .todo-text {
   color: var(--muted);
   text-decoration: line-through;
+}
+
+.todo-dday {
+  justify-self: end;
+  min-width: 54px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(240, 180, 41, 0.18);
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todo-item.is-complete .todo-dday {
+  color: var(--muted);
+  background: #f2eee5;
 }
 
 .delete-button {
@@ -420,7 +494,12 @@ button {
   }
 
   .day-button {
+    padding: 6px;
     font-size: 0.9rem;
+  }
+
+  .day-todo-preview {
+    display: none;
   }
 
   .todo-form {

@@ -6,6 +6,7 @@ const todoInput = document.querySelector("#todoInput");
 const todoList = document.querySelector("#todoList");
 const todoCount = document.querySelector("#todoCount");
 const emptyState = document.querySelector("#emptyState");
+const todoSectionTitle = document.querySelector(".todo-list-section .section-title h3");
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
@@ -56,7 +57,9 @@ todoList.addEventListener("change", (event) => {
   }
 
   const todoId = event.target.dataset.id;
-  todosByDate[selectedDateKey] = getTodosForSelectedDate().map((todo) => {
+  // TodoList 표시 개선: 렌더링된 항목의 날짜 키를 기준으로 상태를 갱신합니다.
+  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map((todo) => {
     if (todo.id !== todoId) {
       return todo;
     }
@@ -74,10 +77,12 @@ todoList.addEventListener("click", (event) => {
   }
 
   const todoId = event.target.dataset.id;
-  todosByDate[selectedDateKey] = getTodosForSelectedDate().filter((todo) => todo.id !== todoId);
+  // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
+  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
 
-  if (todosByDate[selectedDateKey].length === 0) {
-    delete todosByDate[selectedDateKey];
+  if (todosByDate[todoDateKey].length === 0) {
+    delete todosByDate[todoDateKey];
   }
 
   saveTodos();
@@ -100,8 +105,32 @@ function renderCalendar() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "day-button";
-    button.textContent = date.getDate();
-    button.setAttribute("aria-label", formatFullDate(date));
+    const todos = todosByDate[dateKey] || [];
+
+    const dayNumber = document.createElement("span");
+    dayNumber.className = "day-number";
+    dayNumber.textContent = date.getDate();
+
+    const todoPreview = document.createElement("span");
+    todoPreview.className = "day-todo-preview";
+
+    todos.slice(0, 2).forEach((todo) => {
+      const todoText = document.createElement("span");
+      todoText.className = "day-todo-text";
+      todoText.classList.toggle("is-complete", todo.completed);
+      todoText.textContent = todo.text;
+      todoPreview.appendChild(todoText);
+    });
+
+    if (todos.length > 2) {
+      const moreText = document.createElement("span");
+      moreText.className = "day-todo-more";
+      moreText.textContent = `+${todos.length - 2}`;
+      todoPreview.appendChild(moreText);
+    }
+
+    button.append(dayNumber, todoPreview);
+    button.setAttribute("aria-label", getCalendarDateLabel(date, todos));
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -116,7 +145,7 @@ function renderCalendar() {
       button.setAttribute("aria-current", "date");
     }
 
-    if ((todosByDate[dateKey] || []).length > 0) {
+    if (todos.length > 0) {
       button.classList.add("has-todos");
     }
 
@@ -133,10 +162,12 @@ function renderCalendar() {
 }
 
 function renderTodoList() {
-  const todos = getTodosForSelectedDate();
+  // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
+  const todos = getAllTodosWithDaysLeft();
   const completedCount = todos.filter((todo) => todo.completed).length;
 
-  selectedDateLabel.textContent = formatFullDate(fromDateKey(selectedDateKey));
+  selectedDateLabel.textContent = "전체 TodoList";
+  todoSectionTitle.textContent = "전체 체크리스트";
   todoCount.textContent = `${completedCount}/${todos.length} 완료`;
   emptyState.classList.toggle("is-visible", todos.length === 0);
   todoList.innerHTML = "";
@@ -151,11 +182,17 @@ function renderTodoList() {
     checkbox.checked = todo.completed;
     checkbox.dataset.action = "toggle";
     checkbox.dataset.id = todo.id;
+    checkbox.dataset.dateKey = todo.dateKey;
     checkbox.setAttribute("aria-label", `${todo.text} 완료`);
 
     const text = document.createElement("span");
     text.className = "todo-text";
     text.textContent = todo.text;
+
+    const dDay = document.createElement("span");
+    dDay.className = "todo-dday";
+    dDay.textContent = formatDDay(todo.daysLeft);
+    dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -163,9 +200,10 @@ function renderTodoList() {
     deleteButton.textContent = "×";
     deleteButton.dataset.action = "delete";
     deleteButton.dataset.id = todo.id;
+    deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    item.append(checkbox, text, deleteButton);
+    item.append(checkbox, text, dDay, deleteButton);
     todoList.appendChild(item);
   });
 
@@ -219,6 +257,75 @@ function formatFullDate(date) {
     day: "numeric",
     weekday: "long"
   }).format(date);
+}
+
+function getCalendarDateLabel(date, todos) {
+  const dateLabel = formatFullDate(date);
+
+  if (todos.length === 0) {
+    return dateLabel;
+  }
+
+  const todoLabel = todos.map((todo) => todo.text).join(", ");
+  return `${dateLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
+}
+
+function getTodosForSelectedDate() {
+  return getTodosForDate(selectedDateKey);
+}
+
+// TodoList 표시 개선: 날짜 키로 항목을 조회하는 공통 함수입니다.
+function getTodosForDate(dateKey) {
+  return todosByDate[dateKey] || [];
+}
+
+// TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
+function calculateDaysLeftFromToday(dateKey) {
+  const selectedDate = fromDateKey(dateKey);
+  const todayDate = fromDateKey(toDateKey(today));
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  return Math.round((selectedDate - todayDate) / millisecondsPerDay);
+}
+
+function formatDDay(daysLeft) {
+  if (daysLeft === 0) {
+    return "D-Day";
+  }
+
+  return daysLeft > 0 ? `D-${daysLeft}` : `D+${Math.abs(daysLeft)}`;
+}
+
+// TodoList 표시 개선: 특정 날짜의 TodoList 항목에 오늘 기준 남은 일수 정보를 추가합니다.
+function getTodosForDateWithDaysLeft(dateKey) {
+  const daysLeft = calculateDaysLeftFromToday(dateKey);
+
+  return getTodosForDate(dateKey).map((todo) => ({
+    ...todo,
+    dateKey,
+    daysLeft
+  }));
+}
+
+// TodoList 표시 개선: 저장된 모든 날짜의 TodoList 항목을 날짜순으로 모두 모읍니다.
+function getAllTodosWithDaysLeft() {
+  return Object.keys(todosByDate)
+    .sort()
+    .flatMap((dateKey) => getTodosForDateWithDaysLeft(dateKey));
+}
+
+function loadTodos() {
+  try {
+    const savedTodos = localStorage.getItem(STORAGE_KEY);
+    return savedTodos ? JSON.parse(savedTodos) : {};
+  } catch (error) {
+    console.warn("저장된 할 일을 불러오지 못했습니다.", error);
+    return {};
+  }
+}
+
+function saveTodos() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
 }
 
 renderCalendar();
