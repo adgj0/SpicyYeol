@@ -478,6 +478,14 @@ button {
   .todo-form {
     grid-template-columns: 1fr;
   }
+  .priority-selector {
+    height: 46px;
+  }
+
+  .todo-form button[type="submit"],
+  .priority-btn {
+    width: 100%;
+  }
 
   .todo-form button {
     width: 100%;
