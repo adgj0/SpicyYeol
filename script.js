@@ -31,7 +31,7 @@ const todoSectionTitle = document.querySelector(".todo-list-section .section-tit
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
-
+const todoListUrgent = document.querySelector("#todoListUrgent");
 const priorityBtn = document.querySelector("#priorityBtn");
 const priorityDropdown = document.querySelector("#priorityDropdown");
 const priorityOptions = document.querySelectorAll(".priority-option");
