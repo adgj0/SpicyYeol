@@ -270,6 +270,7 @@ if (urgentTodo) {
   todoSectionTitle.textContent = "전체 체크리스트";
   todoCount.textContent = `${completedCount}/${todos.length} 완료`;
   emptyState.classList.toggle("is-visible", todos.length === 0);
+  todoListUrgent.innerHTML = "";
   todoListHigh.innerHTML = "";
   todoListMedium.innerHTML = "";
   todoListLow.innerHTML = "";
