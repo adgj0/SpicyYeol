@@ -487,3 +487,55 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+.priority-selector {
+  height: 46px;
+}
+
+.priority-btn {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.priority-btn:hover {
+  border-color: var(--accent);
+  background: #fbf7ed;
+}
+
+.priority-dropdown {
+  margin-top: 4px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.priority-option {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+  transition: background 0.15s;
+}
+
+.priority-option:hover {
+  background: #fbf7ed;
+}
+
+/* ===== 🌟 중요도별 3단 리스트 간격 조정 ===== */
+.priority-groups h4 {
+  font-size: 0.95rem;
+  border-bottom: 2px solid #f2eee5;
+  padding-bottom: 6px;
+}
+
+.group-high .todo-list,
+.group-medium .todo-list,
+.group-low .todo-list {
+  margin-top: 8px;
+}
