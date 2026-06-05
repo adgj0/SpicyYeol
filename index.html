@@ -35,6 +35,17 @@
 
         <form class="todo-form" id="todoForm">
             <input id="todoInput" type="text" placeholder="할 일을 입력하세요" autocomplete="off" required>
+
+            <div class="priority-selector" style="position: relative;">
+                <button type="button" id="priorityBtn" class="priority-btn" style="height: 100%; white-space: nowrap;">중요도</button>
+                <div id="priorityDropdown" class="priority-dropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ccc; border-radius: 4px; width: 100%; z-index: 10; text-align: center;">
+                    <div class="priority-option" data-value="high" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;">높음</div>
+                    <div class="priority-option" data-value="medium" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;">중간</div>
+                    <div class="priority-option" data-value="low" style="padding: 8px; cursor: pointer;">낮음</div>
+                </div>
+            </div>
+            <input type="hidden" id="selectedPriority" value="medium">
+
             <button type="submit">추가</button>
         </form>
 
