@@ -168,7 +168,7 @@ markTaskState(id, clickType) {
 
         if (clickType === '진행 중') {
             // '진행 중'을 누르면 다시 원래 상태로 되돌림
-            task.status = 'before';
+            task.status = 'in_progress';
             task.result = null;
         } else {
             // O, X, 세모를 누르면 완료 처리
