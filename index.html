@@ -54,6 +54,22 @@
                 <h3>오늘의 체크리스트</h3>
                 <span id="todoCount">0개</span>
             </div>
+
+            <div class="priority-groups" id="priorityGroupsContainer">
+                <div class="group-high">
+                    <h4 style="color: #bc000a; margin-bottom: 8px;">[중요]</h4>
+                    <ul class="todo-list" id="todoListHigh"></ul>
+                </div>
+                <div class="group-medium" style="margin-top: 16px;">
+                    <h4 style="color: #705d00; margin-bottom: 8px;">[보통]</h4>
+                    <ul class="todo-list" id="todoListMedium"></ul>
+                </div>
+                <div class="group-low" style="margin-top: 16px;">
+                    <h4 style="color: #006b25; margin-bottom: 8px;">[일반]</h4>
+                    <ul class="todo-list" id="todoListLow"></ul>
+                </div>
+            </div>
+
             <ul class="todo-list" id="todoList"></ul>
             <p class="empty-state" id="emptyState">이 날짜에는 아직 할 일이 없습니다.</p>
         </section>
