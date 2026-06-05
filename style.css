@@ -225,7 +225,7 @@ button {
   outline: 3px solid rgba(47, 125, 92, 0.18);
 }
 
-.todo-form button {
+.todo-form button[type="submit"] {
   height: 46px;
   border: 0;
   border-radius: 8px;
@@ -234,7 +234,7 @@ button {
   font-weight: 800;
 }
 
-.todo-form button:hover {
+.todo-form button[type="submit"]:hover {
   background: var(--accent-dark);
 }
 
