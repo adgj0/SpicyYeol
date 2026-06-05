@@ -118,13 +118,20 @@ button {
 
 .day-button {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   aspect-ratio: 1;
   min-width: 0;
   border: 1px solid transparent;
   border-radius: 8px;
+  padding: 8px;
   background: #ffffff;
   color: var(--ink);
   font-weight: 700;
+  text-align: left;
+  overflow: hidden;
 }
 
 .day-button:hover {
@@ -154,6 +161,54 @@ button {
   border-radius: 999px;
   background: var(--gold);
   content: "";
+}
+
+.day-number {
+  line-height: 1;
+}
+
+.day-todo-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 0;
+  padding-right: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.day-todo-text,
+.day-todo-more {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-todo-text {
+  color: var(--accent-dark);
+}
+
+.day-button.is-selected .day-todo-text,
+.day-button.is-selected .day-todo-more {
+  color: #ffffff;
+}
+
+.day-button.is-muted .day-todo-text,
+.day-button.is-muted .day-todo-more {
+  color: #8d887f;
+}
+
+.day-todo-text.is-complete {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.day-todo-more {
+  color: var(--muted);
 }
 
 .selected-date {
@@ -420,7 +475,12 @@ button {
   }
 
   .day-button {
+    padding: 6px;
     font-size: 0.9rem;
+  }
+
+  .day-todo-preview {
+    display: none;
   }
 
   .todo-form {

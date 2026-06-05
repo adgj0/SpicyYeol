@@ -100,8 +100,32 @@ function renderCalendar() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "day-button";
-    button.textContent = date.getDate();
-    button.setAttribute("aria-label", formatFullDate(date));
+    const todos = todosByDate[dateKey] || [];
+
+    const dayNumber = document.createElement("span");
+    dayNumber.className = "day-number";
+    dayNumber.textContent = date.getDate();
+
+    const todoPreview = document.createElement("span");
+    todoPreview.className = "day-todo-preview";
+
+    todos.slice(0, 2).forEach((todo) => {
+      const todoText = document.createElement("span");
+      todoText.className = "day-todo-text";
+      todoText.classList.toggle("is-complete", todo.completed);
+      todoText.textContent = todo.text;
+      todoPreview.appendChild(todoText);
+    });
+
+    if (todos.length > 2) {
+      const moreText = document.createElement("span");
+      moreText.className = "day-todo-more";
+      moreText.textContent = `+${todos.length - 2}`;
+      todoPreview.appendChild(moreText);
+    }
+
+    button.append(dayNumber, todoPreview);
+    button.setAttribute("aria-label", getCalendarDateLabel(date, todos));
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -116,7 +140,7 @@ function renderCalendar() {
       button.setAttribute("aria-current", "date");
     }
 
-    if ((todosByDate[dateKey] || []).length > 0) {
+    if (todos.length > 0) {
       button.classList.add("has-todos");
     }
 
@@ -219,6 +243,35 @@ function formatFullDate(date) {
     day: "numeric",
     weekday: "long"
   }).format(date);
+}
+
+function getCalendarDateLabel(date, todos) {
+  const dateLabel = formatFullDate(date);
+
+  if (todos.length === 0) {
+    return dateLabel;
+  }
+
+  const todoLabel = todos.map((todo) => todo.text).join(", ");
+  return `${dateLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
+}
+
+function getTodosForSelectedDate() {
+  return todosByDate[selectedDateKey] || [];
+}
+
+function loadTodos() {
+  try {
+    const savedTodos = localStorage.getItem(STORAGE_KEY);
+    return savedTodos ? JSON.parse(savedTodos) : {};
+  } catch (error) {
+    console.warn("저장된 할 일을 불러오지 못했습니다.", error);
+    return {};
+  }
+}
+
+function saveTodos() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
 }
 
 renderCalendar();
