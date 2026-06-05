@@ -295,7 +295,7 @@ button {
 
 .todo-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 34px;
+  grid-template-columns: 28px minmax(0, 1fr) auto 34px;
   align-items: center;
   gap: 10px;
   min-height: 48px;
@@ -319,6 +319,25 @@ button {
 .todo-item.is-complete .todo-text {
   color: var(--muted);
   text-decoration: line-through;
+}
+
+.todo-dday {
+  justify-self: end;
+  min-width: 54px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(240, 180, 41, 0.18);
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todo-item.is-complete .todo-dday {
+  color: var(--muted);
+  background: #f2eee5;
 }
 
 .delete-button {

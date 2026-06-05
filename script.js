@@ -189,6 +189,11 @@ function renderTodoList() {
     text.className = "todo-text";
     text.textContent = todo.text;
 
+    const dDay = document.createElement("span");
+    dDay.className = "todo-dday";
+    dDay.textContent = formatDDay(todo.daysLeft);
+    dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
+
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "delete-button";
@@ -198,7 +203,7 @@ function renderTodoList() {
     deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    item.append(checkbox, text, deleteButton);
+    item.append(checkbox, text, dDay, deleteButton);
     todoList.appendChild(item);
   });
 
@@ -281,6 +286,14 @@ function calculateDaysLeftFromToday(dateKey) {
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
   return Math.round((selectedDate - todayDate) / millisecondsPerDay);
+}
+
+function formatDDay(daysLeft) {
+  if (daysLeft === 0) {
+    return "D-Day";
+  }
+
+  return daysLeft > 0 ? `D-${daysLeft}` : `D+${Math.abs(daysLeft)}`;
 }
 
 // TodoList 표시 개선: 특정 날짜의 TodoList 항목에 오늘 기준 남은 일수 정보를 추가합니다.
