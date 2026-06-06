@@ -20,6 +20,7 @@ function getDdayColor(daysLeft) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 const calendarGrid = document.querySelector("#calendarGrid");
+const postponeGuide = document.querySelector("#postponeGuide");
 const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const todoForm = document.querySelector("#todoForm");
@@ -49,6 +50,7 @@ const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = toDateKey(today);
 let todosByDate = loadTodos();
+let pendingPostponeTodo = null;
 
 priorityBtn.addEventListener("click", (e) => {
   e.stopPropagation(); // 폼 제출 방지
@@ -125,7 +127,7 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
   if (event.target.checked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
-    SunflowerState.onTaskComplete(daysLeft);
+    SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
       t.id === todoId ? { ...t, fertGiven: true } : t
     );
@@ -151,7 +153,7 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
   if (event.target.checked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
-    SunflowerState.onTaskComplete(daysLeft);
+    SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
       t.id === todoId ? { ...t, fertGiven: true } : t
     );
@@ -162,12 +164,32 @@ priorityGroupsContainer.addEventListener("change", (event) => {
 });
 
 priorityGroupsContainer.addEventListener("click", (event) => {
-  if (!event.target.matches("[data-action='delete']")) return;
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+
+  if (actionButton.dataset.action === "postpone") {
+    const postponeTodo = {
+      id: actionButton.dataset.id,
+      dateKey: actionButton.dataset.dateKey
+    };
+
+    const isSamePostponeTodo =
+      Boolean(pendingPostponeTodo) &&
+      pendingPostponeTodo.id === postponeTodo.id &&
+      pendingPostponeTodo.dateKey === postponeTodo.dateKey;
+
+    pendingPostponeTodo = isSamePostponeTodo ? null : postponeTodo;
+    renderCalendar();
+    renderTodoList();
+    return;
+  }
+
+  if (actionButton.dataset.action !== "delete") return;
 
 
-  const todoId = event.target.dataset.id;
+  const todoId = actionButton.dataset.id;
   // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
-  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  const todoDateKey = actionButton.dataset.dateKey || selectedDateKey;
   todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
 
   if (todosByDate[todoDateKey].length === 0) {
@@ -182,6 +204,8 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 function renderCalendar() {
   calendarGrid.innerHTML = "";
   currentMonthLabel.textContent = formatMonth(visibleDate);
+  postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
+  postponeGuide.setAttribute("aria-hidden", pendingPostponeTodo ? "false" : "true");
 
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth();
@@ -230,7 +254,23 @@ function renderCalendar() {
       button.classList.add("has-todos");
     }
 
+    if (pendingPostponeTodo) {
+      button.classList.add("is-postpone-target");
+    }
+
     button.addEventListener("click", () => {
+      if (pendingPostponeTodo) {
+        postponeTodoToDate(pendingPostponeTodo, dateKey);
+        pendingPostponeTodo = null;
+        selectedDateKey = dateKey;
+        visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
+        saveTodos();
+        renderCalendar();
+        renderTodoList();
+        todoInput.focus();
+        return;
+      }
+
       selectedDateKey = dateKey;
       visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
       renderCalendar();
@@ -312,7 +352,29 @@ if (urgentTodo) {
     deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    item.append(checkbox, text, dDay, deleteButton);
+    item.append(checkbox, text, dDay);
+
+    if (todo.daysLeft < 0 && !todo.completed) {
+      const isActivePostpone =
+        Boolean(pendingPostponeTodo) &&
+        pendingPostponeTodo.id === todo.id &&
+        pendingPostponeTodo.dateKey === todo.dateKey;
+      const postponeButton = document.createElement("button");
+      postponeButton.type = "button";
+      postponeButton.className = "postpone-button";
+      postponeButton.classList.toggle("is-active", isActivePostpone);
+      postponeButton.textContent = isActivePostpone ? "\ucde8\uc18c" : "\ubbf8\ub8e8\uae30";
+      postponeButton.dataset.action = "postpone";
+      postponeButton.dataset.id = todo.id;
+      postponeButton.dataset.dateKey = todo.dateKey;
+      postponeButton.setAttribute(
+        "aria-label",
+        isActivePostpone ? `${todo.text} \ubbf8\ub8e8\uae30 \ucde8\uc18c` : `${todo.text} \ubbf8\ub8e8\uae30`
+      );
+      item.appendChild(postponeButton);
+    }
+
+    item.appendChild(deleteButton);
 
   if (todo.daysLeft <= 3) {
       todoListUrgent.appendChild(item);
@@ -398,6 +460,30 @@ function getTodosForSelectedDate() {
 // TodoList 표시 개선: 날짜 키로 항목을 조회하는 공통 함수입니다.
 function getTodosForDate(dateKey) {
   return todosByDate[dateKey] || [];
+}
+
+function postponeTodoToDate(todoRef, targetDateKey) {
+  const sourceTodos = getTodosForDate(todoRef.dateKey);
+  const todoToMove = sourceTodos.find((todo) => todo.id === todoRef.id);
+
+  if (!todoToMove || todoRef.dateKey === targetDateKey) {
+    return;
+  }
+
+  todosByDate[todoRef.dateKey] = sourceTodos.filter((todo) => todo.id !== todoRef.id);
+
+  if (todosByDate[todoRef.dateKey].length === 0) {
+    delete todosByDate[todoRef.dateKey];
+  }
+
+  todosByDate[targetDateKey] = [
+    ...getTodosForDate(targetDateKey),
+    {
+      ...todoToMove,
+      completed: false,
+      wasProcrastinated: true
+    }
+  ];
 }
 
 // TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
