@@ -401,7 +401,7 @@ button {
   outline: 3px solid rgba(47, 125, 92, 0.18);
 }
 
-.todo-item input {
+.todo-item input[type="checkbox"] {
   width: 20px;
   height: 20px;
   accent-color: var(--accent);

@@ -524,8 +524,14 @@ if (urgentTodo) {
   renderSunflower();
 }
 
-function createEditTextInput() {
-  return document.createElement("input");
+function createEditTextInput(todo) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = todo.text;
+  input.dataset.action = "edit-text";
+  input.dataset.draftKey = todo.draftKey;
+  input.setAttribute("aria-label", `${todo.text} 내용 수정`);
+  return input;
 }
 
 function createEditDateControl(todo) {
