@@ -116,6 +116,36 @@ button {
   gap: 8px;
 }
 
+.calendar-task-panel {
+  position: sticky;
+  bottom: 24px;
+  z-index: 850;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 188px;
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: #fbf7ed;
+  box-shadow: var(--shadow);
+}
+
+.journal-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.journal-button:hover {
+  background: var(--accent-dark);
+}
+
 .postpone-guide {
   display: none;
   margin: 0 0 10px;
