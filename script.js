@@ -20,6 +20,8 @@ function getDdayColor(daysLeft) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 const calendarGrid = document.querySelector("#calendarGrid");
+const calendarPanel = document.querySelector(".calendar-panel");
+const calendarTaskPanel = document.querySelector(".calendar-task-panel");
 const postponeGuide = document.querySelector("#postponeGuide");
 const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
@@ -51,6 +53,25 @@ let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = toDateKey(today);
 let todosByDate = loadTodos();
 let pendingPostponeTodo = null;
+
+function updateCalendarTaskPanelPosition() {
+  if (!calendarPanel || !calendarTaskPanel) return;
+
+  const panelRect = calendarPanel.getBoundingClientRect();
+  const panelStyle = getComputedStyle(calendarPanel);
+  const leftInset = parseFloat(panelStyle.paddingLeft) || 0;
+  const rightInset = parseFloat(panelStyle.paddingRight) || 0;
+  const edgeInset = parseFloat(panelStyle.getPropertyValue("--calendar-task-edge")) || leftInset;
+  const fixedBottom = window.innerHeight - 24;
+  const calendarBottom = panelRect.bottom - edgeInset;
+
+  calendarTaskPanel.style.setProperty("--calendar-task-left", `${panelRect.left + leftInset}px`);
+  calendarTaskPanel.style.setProperty("--calendar-task-width", `${panelRect.width - leftInset - rightInset}px`);
+  calendarTaskPanel.classList.toggle("is-anchored-to-calendar-end", fixedBottom > calendarBottom);
+}
+
+window.addEventListener("scroll", updateCalendarTaskPanelPosition, { passive: true });
+window.addEventListener("resize", updateCalendarTaskPanelPosition);
 
 priorityBtn.addEventListener("click", (e) => {
   e.stopPropagation(); // 폼 제출 방지
@@ -280,6 +301,8 @@ function renderCalendar() {
 
     calendarGrid.appendChild(button);
   }
+
+  updateCalendarTaskPanelPosition();
 }
 
 function renderTodoList() {
@@ -537,3 +560,4 @@ function saveTodos() {
 
 renderCalendar();
 renderTodoList();
+updateCalendarTaskPanelPosition();
