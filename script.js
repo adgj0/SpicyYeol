@@ -51,6 +51,32 @@ let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = toDateKey(today);
 let todosByDate = loadTodos();
 let pendingPostponeTodo = null;
+let currentTodoView = "todo";
+
+const todoViewToggle = document.createElement("div");
+todoViewToggle.className = "todo-view-toggle";
+todoViewToggle.setAttribute("aria-label", "체크리스트 보기 전환");
+
+const todoViewButton = document.createElement("button");
+todoViewButton.type = "button";
+todoViewButton.textContent = "todo";
+todoViewButton.dataset.view = "todo";
+
+const doneViewButton = document.createElement("button");
+doneViewButton.type = "button";
+doneViewButton.textContent = "done";
+doneViewButton.dataset.view = "done";
+
+todoViewToggle.append(todoViewButton, doneViewButton);
+todoSectionTitle.insertAdjacentElement("afterend", todoViewToggle);
+
+todoViewToggle.addEventListener("click", (event) => {
+  const viewButton = event.target.closest("[data-view]");
+  if (!viewButton) return;
+
+  currentTodoView = viewButton.dataset.view;
+  renderTodoList();
+});
 
 priorityBtn.addEventListener("click", (e) => {
   e.stopPropagation(); // 폼 제출 방지
@@ -293,24 +319,36 @@ function renderTodoList() {
     return a.daysLeft - b.daysLeft;
 });
 
-const urgentTodo = todos.find(todo => todo.daysLeft <= 3);
+const visibleTodos = todos.filter((todo) =>
+  currentTodoView === "done" ? todo.completed : !todo.completed
+);
+
+const urgentTodo = todos.find(todo => !todo.completed && todo.daysLeft <= 3);
 
 if (urgentTodo) {
     SunflowerState.updateMoodForUrgentTodo();
 }
 
   const completedCount = todos.filter((todo) => todo.completed).length;
+  const remainingCount = todos.length - completedCount;
 
   selectedDateLabel.textContent = "전체 TodoList";
-  todoSectionTitle.textContent = "전체 체크리스트";
-  todoCount.textContent = `${completedCount}/${todos.length} 완료`;
-  emptyState.classList.toggle("is-visible", todos.length === 0);
+  todoSectionTitle.textContent = currentTodoView === "done" ? "완료한 일" : "해야할 일";
+  todoViewButton.classList.toggle("is-active", currentTodoView === "todo");
+  todoViewButton.setAttribute("aria-pressed", currentTodoView === "todo" ? "true" : "false");
+  doneViewButton.classList.toggle("is-active", currentTodoView === "done");
+  doneViewButton.setAttribute("aria-pressed", currentTodoView === "done" ? "true" : "false");
+  todoCount.textContent =
+    currentTodoView === "done" ? `${completedCount}개 완료` : `${remainingCount}개 남음`;
+  emptyState.textContent =
+    currentTodoView === "done" ? "완료한 일이 없습니다." : "해야할 일이 없습니다.";
+  emptyState.classList.toggle("is-visible", visibleTodos.length === 0);
   todoListUrgent.innerHTML = "";
   todoListHigh.innerHTML = "";
   todoListMedium.innerHTML = "";
   todoListLow.innerHTML = "";
 
-  todos.forEach((todo) => {
+  visibleTodos.forEach((todo) => {
     const item = document.createElement("li");
     item.className = "todo-item";
     item.classList.toggle("is-complete", todo.completed);

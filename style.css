@@ -282,12 +282,41 @@ button {
 .section-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 10px;
 }
 
+.todo-view-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.todo-view-toggle button {
+  min-width: 54px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.todo-view-toggle button:hover {
+  background: #fbf7ed;
+}
+
+.todo-view-toggle button.is-active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
 .section-title span {
+  margin-left: auto;
   color: var(--accent-dark);
   font-weight: 800;
 }
