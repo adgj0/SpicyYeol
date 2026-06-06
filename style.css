@@ -351,28 +351,38 @@ button {
 
 .day-journal-marker {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  line-height: 1;
+  top: 5px;
+  right: 5px;
+  display: block;
+  width: 19px;
+  height: 19px;
+  color: var(--accent);
+}
+
+.day-journal-marker svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
 }
 
 .day-button.is-selected .day-journal-marker {
-  background: #ffffff;
-  color: var(--accent-dark);
+  color: #ffffff;
 }
 
 .day-button.is-muted .day-journal-marker {
-  background: #c8bfae;
-  color: #ffffff;
+  color: #c8bfae;
+}
+
+.day-button.is-selected .day-journal-marker svg,
+.day-button.is-muted .day-journal-marker svg {
+  fill: rgba(255, 255, 255, 0.2);
+  filter: none;
 }
 
 .day-button.is-selected .day-todo-dot {
