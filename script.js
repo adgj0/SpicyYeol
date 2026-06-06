@@ -168,10 +168,17 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   if (!actionButton) return;
 
   if (actionButton.dataset.action === "postpone") {
-    pendingPostponeTodo = {
+    const postponeTodo = {
       id: actionButton.dataset.id,
       dateKey: actionButton.dataset.dateKey
     };
+
+    const isSamePostponeTodo =
+      Boolean(pendingPostponeTodo) &&
+      pendingPostponeTodo.id === postponeTodo.id &&
+      pendingPostponeTodo.dateKey === postponeTodo.dateKey;
+
+    pendingPostponeTodo = isSamePostponeTodo ? null : postponeTodo;
     renderCalendar();
     renderTodoList();
     return;
@@ -348,20 +355,22 @@ if (urgentTodo) {
     item.append(checkbox, text, dDay);
 
     if (todo.daysLeft < 0 && !todo.completed) {
+      const isActivePostpone =
+        Boolean(pendingPostponeTodo) &&
+        pendingPostponeTodo.id === todo.id &&
+        pendingPostponeTodo.dateKey === todo.dateKey;
       const postponeButton = document.createElement("button");
       postponeButton.type = "button";
       postponeButton.className = "postpone-button";
-      postponeButton.classList.toggle(
-        "is-active",
-        Boolean(pendingPostponeTodo) &&
-          pendingPostponeTodo.id === todo.id &&
-          pendingPostponeTodo.dateKey === todo.dateKey
-      );
-      postponeButton.textContent = "\ubbf8\ub8e8\uae30";
+      postponeButton.classList.toggle("is-active", isActivePostpone);
+      postponeButton.textContent = isActivePostpone ? "\ucde8\uc18c" : "\ubbf8\ub8e8\uae30";
       postponeButton.dataset.action = "postpone";
       postponeButton.dataset.id = todo.id;
       postponeButton.dataset.dateKey = todo.dateKey;
-      postponeButton.setAttribute("aria-label", `${todo.text} \ubbf8\ub8e8\uae30`);
+      postponeButton.setAttribute(
+        "aria-label",
+        isActivePostpone ? `${todo.text} \ubbf8\ub8e8\uae30 \ucde8\uc18c` : `${todo.text} \ubbf8\ub8e8\uae30`
+      );
       item.appendChild(postponeButton);
     }
 
