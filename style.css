@@ -116,6 +116,38 @@ button {
   gap: 8px;
 }
 
+.postpone-guide {
+  display: none;
+  margin: 0 0 10px;
+  border: 1px solid rgba(47, 125, 92, 0.35);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #eef8f2;
+  color: var(--accent-dark);
+  box-shadow: 0 10px 24px rgba(32, 90, 66, 0.12);
+}
+
+.postpone-guide.is-visible {
+  display: block;
+}
+
+.postpone-guide strong,
+.postpone-guide span {
+  display: block;
+}
+
+.postpone-guide strong {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.postpone-guide span {
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
 .day-button {
   position: relative;
   display: flex;

@@ -20,6 +20,7 @@ function getDdayColor(daysLeft) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 const calendarGrid = document.querySelector("#calendarGrid");
+const postponeGuide = document.querySelector("#postponeGuide");
 const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const todoForm = document.querySelector("#todoForm");
@@ -196,6 +197,8 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 function renderCalendar() {
   calendarGrid.innerHTML = "";
   currentMonthLabel.textContent = formatMonth(visibleDate);
+  postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
+  postponeGuide.setAttribute("aria-hidden", pendingPostponeTodo ? "false" : "true");
 
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth();
