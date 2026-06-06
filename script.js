@@ -52,6 +52,21 @@ let selectedDateKey = toDateKey(today);
 let todosByDate = loadTodos();
 let pendingPostponeTodo = null;
 let currentTodoView = "todo";
+let isEditMode = false;
+let editDrafts = {};
+
+const todoPanelHeader = document.querySelector(".selected-date");
+const editModeControls = document.createElement("div");
+editModeControls.className = "edit-mode-controls";
+
+const editModeButton = document.createElement("button");
+editModeButton.type = "button";
+editModeButton.className = "edit-mode-button";
+editModeButton.dataset.action = "start-edit";
+editModeButton.textContent = "수정";
+
+editModeControls.appendChild(editModeButton);
+todoPanelHeader.appendChild(editModeControls);
 
 const todoViewToggle = document.createElement("div");
 todoViewToggle.className = "todo-view-toggle";
@@ -76,6 +91,25 @@ todoViewToggle.addEventListener("click", (event) => {
 
   currentTodoView = viewButton.dataset.view;
   renderTodoList();
+});
+
+editModeControls.addEventListener("click", (event) => {
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+
+  if (actionButton.dataset.action === "start-edit") {
+    enterEditMode();
+    return;
+  }
+
+  if (actionButton.dataset.action === "save-edit") {
+    saveEditMode();
+    return;
+  }
+
+  if (actionButton.dataset.action === "cancel-edit") {
+    cancelEditMode();
+  }
 });
 
 priorityBtn.addEventListener("click", (e) => {
@@ -117,6 +151,10 @@ document.querySelector("#nextMonth").addEventListener("click", () => {
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  if (isEditMode) {
+    return;
+  }
+
   const text = todoInput.value.trim();
   if (!text) {
     return;
@@ -141,6 +179,11 @@ todoForm.addEventListener("submit", (event) => {
 });
 
 priorityGroupsContainer.addEventListener("change", (event) => {
+  if (isEditMode) {
+    handleEditModeChange(event);
+    return;
+  }
+
   if (!event.target.matches("[data-action='toggle']")) return;
 
   const todoId = event.target.dataset.id;
@@ -163,7 +206,20 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   renderTodoList();
 });
 
+priorityGroupsContainer.addEventListener("input", (event) => {
+  if (!isEditMode || event.target.dataset.action !== "edit-text") return;
+
+  const draftKey = event.target.dataset.draftKey;
+  if (!draftKey || !editDrafts[draftKey]) return;
+
+  editDrafts[draftKey].text = event.target.value;
+});
+
 priorityGroupsContainer.addEventListener("change", (event) => {
+  if (isEditMode) {
+    return;
+  }
+
   if (!event.target.matches("[data-action='toggle']")) return;
 
   const todoId = event.target.dataset.id;
@@ -192,6 +248,11 @@ priorityGroupsContainer.addEventListener("change", (event) => {
 priorityGroupsContainer.addEventListener("click", (event) => {
   const actionButton = event.target.closest("[data-action]");
   if (!actionButton) return;
+
+  if (isEditMode) {
+    handleEditModeClick(actionButton);
+    return;
+  }
 
   if (actionButton.dataset.action === "postpone") {
     const postponeTodo = {
@@ -310,7 +371,7 @@ function renderCalendar() {
 
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
-  const todos = getAllTodosWithDaysLeft().sort((a, b) => {
+  const todos = getCurrentTodosWithDaysLeft().sort((a, b) => {
 
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
@@ -319,9 +380,9 @@ function renderTodoList() {
     return a.daysLeft - b.daysLeft;
 });
 
-const visibleTodos = todos.filter((todo) =>
-  currentTodoView === "done" ? todo.completed : !todo.completed
-);
+const visibleTodos = isEditMode
+  ? todos
+  : todos.filter((todo) => currentTodoView === "done" ? todo.completed : !todo.completed);
 
 const urgentTodo = todos.find(todo => !todo.completed && todo.daysLeft <= 3);
 
@@ -338,10 +399,19 @@ if (urgentTodo) {
   todoViewButton.setAttribute("aria-pressed", currentTodoView === "todo" ? "true" : "false");
   doneViewButton.classList.toggle("is-active", currentTodoView === "done");
   doneViewButton.setAttribute("aria-pressed", currentTodoView === "done" ? "true" : "false");
+  todoForm.classList.toggle("is-disabled", isEditMode);
+  Array.from(todoForm.elements).forEach((element) => {
+    element.disabled = isEditMode;
+  });
+  renderEditModeControls();
   todoCount.textContent =
     currentTodoView === "done" ? `${completedCount}개 완료` : `${remainingCount}개 남음`;
   emptyState.textContent =
     currentTodoView === "done" ? "완료한 일이 없습니다." : "해야할 일이 없습니다.";
+  if (isEditMode) {
+    todoCount.textContent = `${todos.length}개 수정 중`;
+    emptyState.textContent = "수정할 일이 없습니다.";
+  }
   emptyState.classList.toggle("is-visible", visibleTodos.length === 0);
   todoListUrgent.innerHTML = "";
   todoListHigh.innerHTML = "";
@@ -359,27 +429,43 @@ if (urgentTodo) {
     checkbox.dataset.action = "toggle";
     checkbox.dataset.id = todo.id;
     checkbox.dataset.dateKey = todo.dateKey;
+    if (todo.draftKey) {
+      checkbox.dataset.draftKey = todo.draftKey;
+    }
     checkbox.setAttribute("aria-label", `${todo.text} 완료`);
 
-    const text = document.createElement("span");
-    text.className = "todo-text";
-    text.textContent = todo.text;
+    const text = isEditMode ? createEditTextInput(todo) : document.createElement("span");
+    text.className = isEditMode ? "todo-edit-text" : "todo-text";
 
-    text.style.color = getDdayColor(todo.daysLeft);
+    if (isEditMode) {
+      text.type = "text";
+      text.value = todo.text;
+      text.dataset.action = "edit-text";
+      text.dataset.draftKey = todo.draftKey;
+      text.setAttribute("aria-label", `${todo.text} 내용 수정`);
+    } else {
+      text.textContent = todo.text;
+      text.style.color = getDdayColor(todo.daysLeft);
 
-  if (todo.daysLeft <= 3) {
-    text.style.fontWeight = "700";
-}
+      if (todo.daysLeft <= 3) {
+        text.style.fontWeight = "700";
+      }
+    }
 
-    const dDay = document.createElement("span");
-    dDay.className = "todo-dday";
-    dDay.textContent = formatDDay(todo.daysLeft);
+    const dDay = isEditMode ? createEditDateControl(todo) : document.createElement("span");
+    dDay.className = isEditMode ? "edit-date-control" : "todo-dday";
 
-    if (todo.daysLeft <= 3) {
+    if (!isEditMode) {
+      dDay.textContent = formatDDay(todo.daysLeft);
+    }
+
+    if (!isEditMode && todo.daysLeft <= 3) {
       dDay.style.background = "#cc0000";
       dDay.style.color = "#ffffff";
     }
-    dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
+    if (!isEditMode) {
+      dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
+    }
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -388,11 +474,18 @@ if (urgentTodo) {
     deleteButton.dataset.action = "delete";
     deleteButton.dataset.id = todo.id;
     deleteButton.dataset.dateKey = todo.dateKey;
+    if (todo.draftKey) {
+      deleteButton.dataset.draftKey = todo.draftKey;
+    }
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
     item.append(checkbox, text, dDay);
 
-    if (todo.daysLeft < 0 && !todo.completed) {
+    if (isEditMode) {
+      item.appendChild(createEditPriorityButton(todo));
+    }
+
+    if (!isEditMode && todo.daysLeft < 0 && !todo.completed) {
       const isActivePostpone =
         Boolean(pendingPostponeTodo) &&
         pendingPostponeTodo.id === todo.id &&
@@ -429,6 +522,179 @@ if (urgentTodo) {
   });
 
   renderSunflower();
+}
+
+function createEditTextInput() {
+  return document.createElement("input");
+}
+
+function createEditDateControl(todo) {
+  const wrapper = document.createElement("span");
+  const dateButton = document.createElement("button");
+  const dateInput = document.createElement("input");
+
+  dateButton.type = "button";
+  dateButton.className = "todo-dday edit-date-button";
+  dateButton.textContent = formatDDay(todo.daysLeft);
+  dateButton.dataset.action = "open-date";
+  dateButton.dataset.draftKey = todo.draftKey;
+
+  dateInput.type = "date";
+  dateInput.className = "edit-date-input";
+  dateInput.value = todo.dateKey;
+  dateInput.dataset.action = "edit-date";
+  dateInput.dataset.draftKey = todo.draftKey;
+  dateInput.setAttribute("aria-label", `${todo.text} 마감 날짜 수정`);
+
+  wrapper.append(dateButton, dateInput);
+  return wrapper;
+}
+
+function createEditPriorityButton(todo) {
+  const button = document.createElement("button");
+  const priority = todo.priority || "medium";
+  const priorityStyle = priorityStyleMap[priority] || priorityStyleMap.medium;
+
+  button.type = "button";
+  button.className = "edit-priority-button";
+  button.textContent = `중요도: ${priorityStyle.text}`;
+  button.style.color = priorityStyle.color;
+  button.dataset.action = "edit-priority";
+  button.dataset.draftKey = todo.draftKey;
+  button.setAttribute("aria-label", `${todo.text} 중요도 수정`);
+
+  return button;
+}
+
+function renderEditModeControls() {
+  editModeControls.innerHTML = "";
+
+  if (!isEditMode) {
+    editModeControls.appendChild(editModeButton);
+    return;
+  }
+
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.className = "edit-mode-button";
+  saveButton.dataset.action = "save-edit";
+  saveButton.textContent = "저장";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = "edit-cancel-button";
+  cancelButton.dataset.action = "cancel-edit";
+  cancelButton.textContent = "취소";
+
+  editModeControls.append(saveButton, cancelButton);
+}
+
+function enterEditMode() {
+  editDrafts = createEditDrafts();
+  isEditMode = true;
+  pendingPostponeTodo = null;
+  renderCalendar();
+  renderTodoList();
+}
+
+function saveEditMode() {
+  const nextTodosByDate = {};
+
+  Object.values(editDrafts).forEach((draft) => {
+    const text = draft.text.trim();
+    if (!text) return;
+
+    const nextTodo = {
+      ...draft,
+      text
+    };
+
+    delete nextTodo.draftKey;
+    delete nextTodo.dateKey;
+    delete nextTodo.daysLeft;
+
+    nextTodosByDate[draft.dateKey] = [...(nextTodosByDate[draft.dateKey] || []), nextTodo];
+  });
+
+  todosByDate = nextTodosByDate;
+  isEditMode = false;
+  editDrafts = {};
+  saveTodos();
+  renderCalendar();
+  renderTodoList();
+}
+
+function cancelEditMode() {
+  isEditMode = false;
+  editDrafts = {};
+  renderCalendar();
+  renderTodoList();
+}
+
+function createEditDrafts() {
+  return getAllTodosWithDaysLeft().reduce((drafts, todo) => {
+    const draftKey = getDraftKey(todo.dateKey, todo.id);
+    drafts[draftKey] = {
+      ...todo,
+      draftKey
+    };
+    return drafts;
+  }, {});
+}
+
+function handleEditModeChange(event) {
+  const draftKey = event.target.dataset.draftKey;
+  if (!draftKey || !editDrafts[draftKey]) return;
+
+  if (event.target.dataset.action === "toggle") {
+    editDrafts[draftKey].completed = event.target.checked;
+    renderTodoList();
+    return;
+  }
+
+  if (event.target.dataset.action === "edit-text") {
+    editDrafts[draftKey].text = event.target.value;
+    return;
+  }
+
+  if (event.target.dataset.action === "edit-date") {
+    editDrafts[draftKey].dateKey = event.target.value;
+    renderCalendar();
+    renderTodoList();
+  }
+}
+
+function handleEditModeClick(actionButton) {
+  const draftKey = actionButton.dataset.draftKey;
+
+  if (actionButton.dataset.action === "open-date") {
+    const dateInput = actionButton.parentElement.querySelector(".edit-date-input");
+    dateInput.focus();
+    if (typeof dateInput.showPicker === "function") {
+      dateInput.showPicker();
+    }
+    return;
+  }
+
+  if (!draftKey || !editDrafts[draftKey]) return;
+
+  if (actionButton.dataset.action === "edit-priority") {
+    editDrafts[draftKey].priority = getNextPriority(editDrafts[draftKey].priority || "medium");
+    renderTodoList();
+    return;
+  }
+
+  if (actionButton.dataset.action === "delete") {
+    delete editDrafts[draftKey];
+    renderCalendar();
+    renderTodoList();
+  }
+}
+
+function getNextPriority(priority) {
+  if (priority === "high") return "medium";
+  if (priority === "medium") return "low";
+  return "high";
 }
 
 function renderSunflower() {
@@ -557,6 +823,21 @@ function getAllTodosWithDaysLeft() {
   return Object.keys(todosByDate)
     .sort()
     .flatMap((dateKey) => getTodosForDateWithDaysLeft(dateKey));
+}
+
+function getCurrentTodosWithDaysLeft() {
+  if (!isEditMode) {
+    return getAllTodosWithDaysLeft();
+  }
+
+  return Object.values(editDrafts).map((todo) => ({
+    ...todo,
+    daysLeft: calculateDaysLeftFromToday(todo.dateKey)
+  }));
+}
+
+function getDraftKey(dateKey, todoId) {
+  return `${dateKey}::${todoId}`;
 }
 
 function loadTodos() {
