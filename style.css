@@ -344,6 +344,17 @@ button {
   background: #f8f4ea;
 }
 
+.day-button.is-past:not(.is-selected) {
+  background: #fbf8f1;
+  border-color: #f1eadb;
+}
+
+.day-button.is-muted.is-past:not(.is-selected) {
+  color: #aaa49a;
+  background: #f8f4ea;
+  border-color: transparent;
+}
+
 .day-button.is-today {
   border-color: var(--gold);
 }
@@ -414,18 +425,36 @@ button {
   color: #c8bfae;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-journal-marker {
+  color: #4d8a69;
+}
+
 .day-button.is-selected .day-journal-marker svg,
 .day-button.is-muted .day-journal-marker svg {
   fill: rgba(255, 255, 255, 0.2);
   filter: none;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-journal-marker svg {
+  fill: rgba(255, 255, 255, 0.78);
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.12));
+}
+
 .day-button.is-selected .day-todo-dot {
   background: #ffffff;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-todo-dot {
+  background: #d3ad45;
+}
+
 .day-button.is-muted .day-todo-dot {
   background: #c8bfae;
+}
+
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-sunflower-marker {
+  opacity: 0.96;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
 }
 
 .selected-date {

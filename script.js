@@ -509,6 +509,10 @@ function renderCalendar() {
       button.classList.add("is-muted");
     }
 
+    if (dateKey < todayKey) {
+      button.classList.add("is-past");
+    }
+
     if (dateKey === toDateKey(today)) {
       button.classList.add("is-today");
     }
