@@ -63,6 +63,8 @@ let journalsByDate = loadJournals();
 let pendingPostponeTodo = null;
 let isJournalEditing = false;
 let journalMessage = "";
+let editingTodoId = null;
+let editingDateKey = null;
 
 const categoryMap = {
   study: "학업",
@@ -70,6 +72,33 @@ const categoryMap = {
   team: "팀플",
   work: "업무"
 };
+
+// 팝업 닫기
+modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+// 팝업 저장 (추가/수정 공통)
+modalSaveBtn.addEventListener("click", () => {
+  const text = modalTextInput.value.trim();
+  if (!text) return;
+
+  const targetDateKey = editingDateKey || selectedDateKey;
+
+  if (editingTodoId) { // 수정일 때
+    todosByDate[targetDateKey] = getTodosForDate(targetDateKey).map(t =>
+      t.id === editingTodoId ? { ...t, text, priority: modalPriority.value, category: modalCategory.value } : t
+    );
+  } else { // 새로 추가할 때
+    const newTodo = {
+      id: crypto.randomUUID(), text, completed: false,
+      priority: modalPriority.value, category: modalCategory.value
+    };
+    todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
+  }
+
+  todoModal.style.display = "none";
+  todoInput.value = "";
+  saveTodos(); renderCalendar(); renderTodoList();
+});
 
 function updateCalendarTaskPanelPosition() {
   if (!calendarPanel || !calendarTaskPanel) return;
