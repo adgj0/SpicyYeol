@@ -35,7 +35,13 @@ const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
 const todoListUrgent = document.querySelector("#todoListUrgent");
-
+const todoModal = document.querySelector("#todoModal");
+const modalTitle = document.querySelector("#modalTitle");
+const modalTextInput = document.querySelector("#modalTextInput");
+const modalPriority = document.querySelector("#modalPriority");
+const modalCategory = document.querySelector("#modalCategory");
+const modalSaveBtn = document.querySelector("#modalSaveBtn");
+const modalCancelBtn = document.querySelector("#modalCancelBtn");
 const selectedPriorityInput = document.querySelector("#selectedPriority");
 const todoListHigh = document.querySelector("#todoListHigh");
 const todoListMedium = document.querySelector("#todoListMedium");
