@@ -314,7 +314,14 @@ function renderCalendar() {
     if (hasJournal) {
       const journalMarker = document.createElement("span");
       journalMarker.className = "day-journal-marker";
-      journalMarker.textContent = "\uc77c";
+      journalMarker.innerHTML = `
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M12 7.75c-1.35-1.2-3.2-1.9-5.5-1.9H4.75A1.75 1.75 0 0 0 3 7.6v10.55c0 .55.45 1 1 1h2.5c2.3 0 4.15.7 5.5 1.9 1.35-1.2 3.2-1.9 5.5-1.9H20c.55 0 1-.45 1-1V7.6a1.75 1.75 0 0 0-1.75-1.75H17.5c-2.3 0-4.15.7-5.5 1.9Z" />
+          <path d="M12 7.75v13.3" />
+          <path d="M7 9.35c1.35.08 2.5.42 3.45 1.05" />
+          <path d="M17 9.35c-1.35.08-2.5.42-3.45 1.05" />
+        </svg>
+      `;
       journalMarker.setAttribute("aria-hidden", "true");
       button.append(dayNumber, journalMarker, todoDots);
     } else {
