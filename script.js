@@ -536,7 +536,15 @@ if (urgentTodo) {
     deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    item.append(checkbox, text, dDay);
+    const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "edit-button";
+      editButton.textContent = "✏️";
+      editButton.dataset.action = "edit";
+      editButton.dataset.id = todo.id;
+      editButton.dataset.dateKey = todo.dateKey;
+
+    item.append(checkbox, text, dDay, editButton, deleteButton);
 
     if (todo.daysLeft < 0 && !todo.completed) {
       const isActivePostpone =
