@@ -270,12 +270,18 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 
   // 2️⃣ 삭제(X) 버튼 처리
   if (action === "delete") {
+    const todoToDelete = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (todoToDelete) {
+        deletedTodos.unshift({ ...todoToDelete, dateKey: todoDateKey, deletedAt: new Date().toISOString() });
+        saveDeletedTodos();
+    }
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
     if (todosByDate[todoDateKey].length === 0) {
-      delete todosByDate[todoDateKey];
+        delete todosByDate[todoDateKey];
     }
     saveTodos(); renderCalendar(); renderTodoList();
     return;
+
   }
 
   // 3️⃣ 수정(✏️) 버튼 처리
