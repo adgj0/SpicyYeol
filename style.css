@@ -851,6 +851,7 @@ button {
 }
 .status-pending { background: #f2eee5; color: #888; }
 .status-in-progress { background: #e3f2fd; color: #1976d2; }
+.status-completed { background: #e8f5e9; color: #2e7d32; cursor: default; }
 .status-badge:hover { filter: brightness(0.95); }
 
 @media (max-width: 480px) {
