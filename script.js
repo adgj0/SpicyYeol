@@ -146,6 +146,35 @@ function renderOwnedSunflowerCount() {
 
 window.addEventListener("sunflower-owned-count-change", renderOwnedSunflowerCount);
 
+function spendOwnedSunflower() {
+  if (SunflowerState.ownedCount <= 0) return false;
+
+  SunflowerState.ownedCount -= 1;
+  localStorage.setItem("sf.ownedCount", SunflowerState.ownedCount);
+  window.dispatchEvent(new CustomEvent("sunflower-owned-count-change", {
+    detail: { ownedCount: SunflowerState.ownedCount },
+  }));
+  SunflowerPanel.refresh();
+  SunflowerNavIcon.refresh();
+  return true;
+}
+
+function placeSunflowerOnDate(dateKey) {
+  if (sunflowersByDate[dateKey]) {
+    alert("이미 해바라기가 붙어 있는 날짜입니다.");
+    return false;
+  }
+
+  if (!spendOwnedSunflower()) {
+    alert("보유한 해바라기가 없습니다.");
+    return false;
+  }
+
+  sunflowersByDate[dateKey] = true;
+  saveSunflowers();
+  return true;
+}
+
 
 
 document.querySelector("#prevMonth").addEventListener("click", () => {
@@ -516,14 +545,15 @@ function renderCalendar() {
 
     button.addEventListener("click", () => {
       if (isSunflowerPlacementMode) {
-        sunflowersByDate[dateKey] = true;
+        const placed = placeSunflowerOnDate(dateKey);
         isSunflowerPlacementMode = false;
         selectedDateKey = dateKey;
         visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
-        saveSunflowers();
         renderCalendar();
-        renderTodoList();
-        renderJournalPanel();
+        if (placed) {
+          renderTodoList();
+          renderJournalPanel();
+        }
         return;
       }
 
