@@ -54,7 +54,9 @@ button {
 }
 
 .calendar-panel {
-  padding: 22px;
+  --calendar-task-edge: 22px;
+  position: relative;
+  padding: 22px 22px 158px;
 }
 
 .todo-panel {
@@ -116,6 +118,174 @@ button {
   gap: 8px;
 }
 
+.calendar-journal-panel {
+  margin-top: 14px;
+}
+
+.calendar-task-panel {
+  position: fixed;
+  left: var(--calendar-task-left, 22px);
+  bottom: 24px;
+  z-index: 850;
+  display: flex;
+  align-items: flex-start;
+  width: var(--calendar-task-width, 100%);
+  min-height: 118px;
+  margin-top: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: #fbf7ed;
+  box-shadow: var(--shadow);
+}
+
+.calendar-task-panel.is-anchored-to-calendar-end {
+  position: absolute;
+  right: var(--calendar-task-edge);
+  bottom: var(--calendar-task-edge);
+  left: var(--calendar-task-edge);
+  width: auto;
+}
+
+.journal-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.journal-button:hover {
+  background: var(--accent-dark);
+}
+
+.journal-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbf7ed;
+}
+
+.journal-input {
+  width: 100%;
+  min-height: 86px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.journal-input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(47, 125, 92, 0.18);
+}
+
+.journal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.journal-save-button,
+.journal-cancel-button {
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.journal-save-button {
+  border: 0;
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.journal-save-button:hover {
+  background: var(--accent-dark);
+}
+
+.journal-cancel-button {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--muted);
+}
+
+.journal-cancel-button:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+.journal-message {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.journal-view {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.journal-view strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+}
+
+.journal-view p {
+  max-height: 118px;
+  margin: 0;
+  overflow-y: auto;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.postpone-guide {
+  display: none;
+  margin: 0 0 10px;
+  border: 1px solid rgba(47, 125, 92, 0.35);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #eef8f2;
+  color: var(--accent-dark);
+  box-shadow: 0 10px 24px rgba(32, 90, 66, 0.12);
+}
+
+.postpone-guide.is-visible {
+  display: block;
+}
+
+.postpone-guide strong,
+.postpone-guide span {
+  display: block;
+}
+
+.postpone-guide strong {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.postpone-guide span {
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
 .day-button {
   position: relative;
   display: flex;
@@ -136,6 +306,11 @@ button {
 
 .day-button:hover {
   border-color: var(--accent);
+}
+
+.day-button.is-postpone-target {
+  outline: 2px dashed rgba(47, 125, 92, 0.45);
+  outline-offset: -4px;
 }
 
 .day-button.is-muted {
@@ -172,6 +347,42 @@ button {
   height: 6px;
   border-radius: 999px;
   background: var(--gold);
+}
+
+.day-journal-marker {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: block;
+  width: 19px;
+  height: 19px;
+  color: var(--accent);
+}
+
+.day-journal-marker svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
+}
+
+.day-button.is-selected .day-journal-marker {
+  color: #ffffff;
+}
+
+.day-button.is-muted .day-journal-marker {
+  color: #c8bfae;
+}
+
+.day-button.is-selected .day-journal-marker svg,
+.day-button.is-muted .day-journal-marker svg {
+  fill: rgba(255, 255, 255, 0.2);
+  filter: none;
 }
 
 .day-button.is-selected .day-todo-dot {
@@ -266,7 +477,7 @@ button {
 
 .todo-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto 34px;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto 34px;
   align-items: center;
   gap: 10px;
   min-height: 48px;
@@ -312,6 +523,7 @@ button {
 }
 
 .delete-button {
+  grid-column: -2 / -1;
   width: 32px;
   height: 32px;
   border: 1px solid transparent;
@@ -324,6 +536,24 @@ button {
 .delete-button:hover {
   border-color: rgba(185, 74, 72, 0.35);
   background: rgba(185, 74, 72, 0.08);
+}
+
+.postpone-button {
+  min-width: 58px;
+  height: 32px;
+  border: 1px solid rgba(47, 125, 92, 0.35);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.postpone-button:hover,
+.postpone-button.is-active {
+  border-color: var(--accent);
+  background: rgba(47, 125, 92, 0.12);
 }
 
 .empty-state {
@@ -459,6 +689,11 @@ button {
   .calendar-panel,
   .todo-panel {
     padding: 16px;
+  }
+
+  .calendar-panel {
+    --calendar-task-edge: 16px;
+    padding-bottom: 140px;
   }
 
   .calendar-grid {

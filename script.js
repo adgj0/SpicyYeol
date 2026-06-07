@@ -20,6 +20,10 @@ function getDdayColor(daysLeft) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 const calendarGrid = document.querySelector("#calendarGrid");
+const calendarPanel = document.querySelector(".calendar-panel");
+const calendarTaskPanel = document.querySelector(".calendar-task-panel");
+const calendarJournalPanel = document.querySelector("#calendarJournalPanel");
+const postponeGuide = document.querySelector("#postponeGuide");
 const currentMonthLabel = document.querySelector("#currentMonth");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const todoForm = document.querySelector("#todoForm");
@@ -45,10 +49,35 @@ sunflowerGarden.appendChild(sfCanvas);
 SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
+const JOURNAL_STORAGE_KEY = "spicyyeol.journalsByDate";
 const today = new Date();
+const todayKey = toDateKey(today);
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
-let selectedDateKey = toDateKey(today);
+let selectedDateKey = todayKey;
 let todosByDate = loadTodos();
+let journalsByDate = loadJournals();
+let pendingPostponeTodo = null;
+let isJournalEditing = false;
+let journalMessage = "";
+
+function updateCalendarTaskPanelPosition() {
+  if (!calendarPanel || !calendarTaskPanel) return;
+
+  const panelRect = calendarPanel.getBoundingClientRect();
+  const panelStyle = getComputedStyle(calendarPanel);
+  const leftInset = parseFloat(panelStyle.paddingLeft) || 0;
+  const rightInset = parseFloat(panelStyle.paddingRight) || 0;
+  const edgeInset = parseFloat(panelStyle.getPropertyValue("--calendar-task-edge")) || leftInset;
+  const fixedBottom = window.innerHeight - 24;
+  const calendarBottom = panelRect.bottom - edgeInset;
+
+  calendarTaskPanel.style.setProperty("--calendar-task-left", `${panelRect.left + leftInset}px`);
+  calendarTaskPanel.style.setProperty("--calendar-task-width", `${panelRect.width - leftInset - rightInset}px`);
+  calendarTaskPanel.classList.toggle("is-anchored-to-calendar-end", fixedBottom > calendarBottom);
+}
+
+window.addEventListener("scroll", updateCalendarTaskPanelPosition, { passive: true });
+window.addEventListener("resize", updateCalendarTaskPanelPosition);
 
 priorityBtn.addEventListener("click", (e) => {
   e.stopPropagation(); // 폼 제출 방지
@@ -84,6 +113,55 @@ document.querySelector("#prevMonth").addEventListener("click", () => {
 document.querySelector("#nextMonth").addEventListener("click", () => {
   visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() + 1, 1);
   renderCalendar();
+});
+
+calendarTaskPanel.addEventListener("click", (event) => {
+  if (!event.target.closest(".journal-button")) return;
+
+  if (!canWriteJournalForSelectedDate()) {
+    isJournalEditing = false;
+    journalMessage = "\ubbf8\ub798 \ub0a0\uc9dc\uc5d0\ub294 \uc77c\uae30\ub97c \uc791\uc131\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.";
+    renderJournalPanel();
+    return;
+  }
+
+  isJournalEditing = true;
+  journalMessage = "";
+  renderJournalPanel();
+  const journalInput = calendarJournalPanel.querySelector("#journalInput");
+  if (journalInput) {
+    journalInput.focus();
+  }
+});
+
+calendarJournalPanel.addEventListener("click", (event) => {
+  const journalActionButton = event.target.closest("[data-journal-action]");
+  if (!journalActionButton) return;
+
+  if (journalActionButton.dataset.journalAction === "cancel") {
+    isJournalEditing = false;
+    journalMessage = "";
+    renderJournalPanel();
+    return;
+  }
+
+  if (journalActionButton.dataset.journalAction !== "save") return;
+
+  const journalInput = calendarJournalPanel.querySelector("#journalInput");
+  const journalText = journalInput ? journalInput.value.trim() : "";
+
+  if (journalText) {
+    journalsByDate[selectedDateKey] = journalText;
+    journalMessage = "";
+  } else {
+    delete journalsByDate[selectedDateKey];
+    journalMessage = "\ube48 \uc77c\uae30\ub294 \uc800\uc7a5\ud558\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.";
+  }
+
+  isJournalEditing = false;
+  saveJournals();
+  renderCalendar();
+  renderJournalPanel();
 });
 
 todoForm.addEventListener("submit", (event) => {
@@ -125,7 +203,7 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
   if (event.target.checked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
-    SunflowerState.onTaskComplete(daysLeft);
+    SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
       t.id === todoId ? { ...t, fertGiven: true } : t
     );
@@ -151,7 +229,7 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
   if (event.target.checked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
-    SunflowerState.onTaskComplete(daysLeft);
+    SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
       t.id === todoId ? { ...t, fertGiven: true } : t
     );
@@ -162,12 +240,32 @@ priorityGroupsContainer.addEventListener("change", (event) => {
 });
 
 priorityGroupsContainer.addEventListener("click", (event) => {
-  if (!event.target.matches("[data-action='delete']")) return;
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+
+  if (actionButton.dataset.action === "postpone") {
+    const postponeTodo = {
+      id: actionButton.dataset.id,
+      dateKey: actionButton.dataset.dateKey
+    };
+
+    const isSamePostponeTodo =
+      Boolean(pendingPostponeTodo) &&
+      pendingPostponeTodo.id === postponeTodo.id &&
+      pendingPostponeTodo.dateKey === postponeTodo.dateKey;
+
+    pendingPostponeTodo = isSamePostponeTodo ? null : postponeTodo;
+    renderCalendar();
+    renderTodoList();
+    return;
+  }
+
+  if (actionButton.dataset.action !== "delete") return;
 
 
-  const todoId = event.target.dataset.id;
+  const todoId = actionButton.dataset.id;
   // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
-  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
+  const todoDateKey = actionButton.dataset.dateKey || selectedDateKey;
   todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
 
   if (todosByDate[todoDateKey].length === 0) {
@@ -182,6 +280,8 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 function renderCalendar() {
   calendarGrid.innerHTML = "";
   currentMonthLabel.textContent = formatMonth(visibleDate);
+  postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
+  postponeGuide.setAttribute("aria-hidden", pendingPostponeTodo ? "false" : "true");
 
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth();
@@ -196,6 +296,7 @@ function renderCalendar() {
     button.className = "day-button";
     const todos = todosByDate[dateKey] || [];
     const activeTodos = todos.filter((todo) => !todo.completed);
+    const hasJournal = Boolean(journalsByDate[dateKey]);
 
     const dayNumber = document.createElement("span");
     dayNumber.className = "day-number";
@@ -210,8 +311,23 @@ function renderCalendar() {
       todoDots.appendChild(dot);
     });
 
-    button.append(dayNumber, todoDots);
-    button.setAttribute("aria-label", getCalendarDateLabel(date, activeTodos));
+    if (hasJournal) {
+      const journalMarker = document.createElement("span");
+      journalMarker.className = "day-journal-marker";
+      journalMarker.innerHTML = `
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M12 7.75c-1.35-1.2-3.2-1.9-5.5-1.9H4.75A1.75 1.75 0 0 0 3 7.6v10.55c0 .55.45 1 1 1h2.5c2.3 0 4.15.7 5.5 1.9 1.35-1.2 3.2-1.9 5.5-1.9H20c.55 0 1-.45 1-1V7.6a1.75 1.75 0 0 0-1.75-1.75H17.5c-2.3 0-4.15.7-5.5 1.9Z" />
+          <path d="M12 7.75v13.3" />
+          <path d="M7 9.35c1.35.08 2.5.42 3.45 1.05" />
+          <path d="M17 9.35c-1.35.08-2.5.42-3.45 1.05" />
+        </svg>
+      `;
+      journalMarker.setAttribute("aria-hidden", "true");
+      button.append(dayNumber, journalMarker, todoDots);
+    } else {
+      button.append(dayNumber, todoDots);
+    }
+    button.setAttribute("aria-label", getCalendarDateLabel(date, activeTodos, hasJournal));
 
     if (date.getMonth() !== month) {
       button.classList.add("is-muted");
@@ -230,16 +346,44 @@ function renderCalendar() {
       button.classList.add("has-todos");
     }
 
+    if (hasJournal) {
+      button.classList.add("has-journal");
+    }
+
+    if (pendingPostponeTodo) {
+      button.classList.add("is-postpone-target");
+    }
+
     button.addEventListener("click", () => {
+      if (pendingPostponeTodo) {
+        postponeTodoToDate(pendingPostponeTodo, dateKey);
+        pendingPostponeTodo = null;
+        selectedDateKey = dateKey;
+        visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
+        saveTodos();
+        renderCalendar();
+        renderTodoList();
+        isJournalEditing = false;
+        journalMessage = "";
+        renderJournalPanel();
+        todoInput.focus();
+        return;
+      }
+
       selectedDateKey = dateKey;
       visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
+      isJournalEditing = false;
+      journalMessage = "";
       renderCalendar();
       renderTodoList();
+      renderJournalPanel();
       todoInput.focus();
     });
 
     calendarGrid.appendChild(button);
   }
+
+  updateCalendarTaskPanelPosition();
 }
 
 function renderTodoList() {
@@ -312,7 +456,29 @@ if (urgentTodo) {
     deleteButton.dataset.dateKey = todo.dateKey;
     deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    item.append(checkbox, text, dDay, deleteButton);
+    item.append(checkbox, text, dDay);
+
+    if (todo.daysLeft < 0 && !todo.completed) {
+      const isActivePostpone =
+        Boolean(pendingPostponeTodo) &&
+        pendingPostponeTodo.id === todo.id &&
+        pendingPostponeTodo.dateKey === todo.dateKey;
+      const postponeButton = document.createElement("button");
+      postponeButton.type = "button";
+      postponeButton.className = "postpone-button";
+      postponeButton.classList.toggle("is-active", isActivePostpone);
+      postponeButton.textContent = isActivePostpone ? "\ucde8\uc18c" : "\ubbf8\ub8e8\uae30";
+      postponeButton.dataset.action = "postpone";
+      postponeButton.dataset.id = todo.id;
+      postponeButton.dataset.dateKey = todo.dateKey;
+      postponeButton.setAttribute(
+        "aria-label",
+        isActivePostpone ? `${todo.text} \ubbf8\ub8e8\uae30 \ucde8\uc18c` : `${todo.text} \ubbf8\ub8e8\uae30`
+      );
+      item.appendChild(postponeButton);
+    }
+
+    item.appendChild(deleteButton);
 
   if (todo.daysLeft <= 3) {
       todoListUrgent.appendChild(item);
@@ -351,6 +517,71 @@ function renderSunflower() {
   }
 }
 
+function renderJournalPanel() {
+  const savedJournal = journalsByDate[selectedDateKey] || "";
+  calendarJournalPanel.innerHTML = "";
+
+  if (!isJournalEditing && !journalMessage && !savedJournal) {
+    return;
+  }
+
+  const panelContent = document.createElement("div");
+  panelContent.className = "journal-panel-content";
+
+  if (isJournalEditing) {
+    const textarea = document.createElement("textarea");
+    textarea.id = "journalInput";
+    textarea.className = "journal-input";
+    textarea.value = savedJournal;
+    textarea.placeholder = "\uc624\ub298\uc758 \uc77c\uae30\ub97c \uc801\uc5b4\ubcf4\uc138\uc694.";
+
+    const actions = document.createElement("div");
+    actions.className = "journal-actions";
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.className = "journal-save-button";
+    saveButton.dataset.journalAction = "save";
+    saveButton.textContent = "\uc800\uc7a5";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "journal-cancel-button";
+    cancelButton.dataset.journalAction = "cancel";
+    cancelButton.textContent = "\ucde8\uc18c";
+
+    actions.append(saveButton, cancelButton);
+    panelContent.append(textarea, actions);
+  } else {
+    if (journalMessage) {
+      const message = document.createElement("p");
+      message.className = "journal-message";
+      message.textContent = journalMessage;
+      panelContent.appendChild(message);
+    }
+
+    if (savedJournal) {
+      const journalView = document.createElement("article");
+      journalView.className = "journal-view";
+
+      const title = document.createElement("strong");
+      title.textContent = "\uc77c\uae30";
+
+      const body = document.createElement("p");
+      body.textContent = savedJournal;
+
+      journalView.append(title, body);
+      panelContent.appendChild(journalView);
+    }
+  }
+
+  calendarJournalPanel.appendChild(panelContent);
+}
+
+function canWriteJournalForSelectedDate() {
+  return selectedDateKey <= todayKey;
+}
+
 function toDateKey(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -380,14 +611,18 @@ function formatFullDate(date) {
   }).format(date);
 }
 
-function getCalendarDateLabel(date, todos) {
+function getCalendarDateLabel(date, todos, hasJournal = false) {
   const dateLabel = formatFullDate(date);
+  const journalLabel = hasJournal ? ", \uc77c\uae30 \uc788\uc74c" : "";
 
   if (todos.length === 0) {
-    return dateLabel;
+    return `${dateLabel}${journalLabel}`;
   }
 
   const todoLabel = todos.map((todo) => todo.text).join(", ");
+  if (hasJournal) {
+    return `${dateLabel}${journalLabel}, \ud560 \uc77c ${todos.length}\uac1c: ${todoLabel}`;
+  }
   return `${dateLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
 }
 
@@ -398,6 +633,30 @@ function getTodosForSelectedDate() {
 // TodoList 표시 개선: 날짜 키로 항목을 조회하는 공통 함수입니다.
 function getTodosForDate(dateKey) {
   return todosByDate[dateKey] || [];
+}
+
+function postponeTodoToDate(todoRef, targetDateKey) {
+  const sourceTodos = getTodosForDate(todoRef.dateKey);
+  const todoToMove = sourceTodos.find((todo) => todo.id === todoRef.id);
+
+  if (!todoToMove || todoRef.dateKey === targetDateKey) {
+    return;
+  }
+
+  todosByDate[todoRef.dateKey] = sourceTodos.filter((todo) => todo.id !== todoRef.id);
+
+  if (todosByDate[todoRef.dateKey].length === 0) {
+    delete todosByDate[todoRef.dateKey];
+  }
+
+  todosByDate[targetDateKey] = [
+    ...getTodosForDate(targetDateKey),
+    {
+      ...todoToMove,
+      completed: false,
+      wasProcrastinated: true
+    }
+  ];
 }
 
 // TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
@@ -449,5 +708,21 @@ function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
 }
 
+function loadJournals() {
+  try {
+    const savedJournals = localStorage.getItem(JOURNAL_STORAGE_KEY);
+    return savedJournals ? JSON.parse(savedJournals) : {};
+  } catch (error) {
+    console.warn("\uc800\uc7a5\ub41c \uc77c\uae30\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.", error);
+    return {};
+  }
+}
+
+function saveJournals() {
+  localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalsByDate));
+}
+
 renderCalendar();
 renderTodoList();
+renderJournalPanel();
+updateCalendarTaskPanelPosition();
