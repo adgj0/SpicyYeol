@@ -65,6 +65,8 @@ let isJournalEditing = false;
 let journalMessage = "";
 let editingTodoId = null;
 let editingDateKey = null;
+const TRASH_STORAGE_KEY = "spicyyeol.deletedTodos";
+let deletedTodos = loadDeletedTodos();
 
 const categoryMap = {
   study: "학업",
