@@ -213,23 +213,32 @@ priorityGroupsContainer.addEventListener("change", (event) => {
   if (!event.target.matches("[data-action='toggle']")) return;
 
   const todoId = event.target.dataset.id;
-  // TodoList 표시 개선: 렌더링된 항목의 날짜 키를 기준으로 상태를 갱신합니다.
   const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
-  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map((todo) => {
-    if (todo.id !== todoId) {
-      return todo;
-    }
 
-    return { ...todo, completed: event.target.checked };
+  // 🌟 핵심: 체크박스 체크 여부에 따라 completed와 status를 동시에 업데이트
+  const isChecked = event.target.checked;
+
+  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map((todo) => {
+    if (todo.id !== todoId) return todo;
+
+    return {
+      ...todo,
+      completed: isChecked,
+      status: isChecked ? "completed" : "pending" // 완료면 completed, 아니면 pending으로 복구
+    };
   });
+
   const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
-  if (event.target.checked && !todo.fertGiven) {
+
+  // 비료 주기 로직 (기존 유지)
+  if (isChecked && !todo.fertGiven) {
     const daysLeft = calculateDaysLeftFromToday(todoDateKey);
     SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
       t.id === todoId ? { ...t, fertGiven: true } : t
     );
   }
+
   saveTodos();
   renderCalendar();
   renderTodoList();
