@@ -148,6 +148,19 @@ document.querySelector("#nextMonth").addEventListener("click", () => {
 });
 
 calendarTaskPanel.addEventListener("click", (event) => {
+  const deleteJournalButton = event.target.closest("[data-journal-action='delete']");
+  if (deleteJournalButton) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    delete journalsByDate[selectedDateKey];
+    isJournalEditing = false;
+    journalMessage = "";
+    saveJournals();
+    renderCalendar();
+    renderJournalPanel();
+    return;
+  }
+
   if (!event.target.closest(".journal-button")) return;
 
   if (!canWriteJournalForSelectedDate()) {
