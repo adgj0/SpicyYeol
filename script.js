@@ -419,9 +419,9 @@ function renderTodoList() {
   let todos = getAllTodosWithDaysLeft();
 
   if (currentFilter === "pending") {
-    todos = todos.filter(t => !t.completed && t.status !== "in-progress");
+    todos = todos.filter(t => !t.completed && (t.status || "pending") == "pending");
   } else if (currentFilter === "in-progress") {
-    todos = todos.filter(t => !t.completed && t.status === "in-progress");
+    todos = todos.filter(t => !t.completed && (t.status || "pending") === "in-progress");
   } else if (currentFilter === "completed") {
     todos = todos.filter(t => t.completed);
   }
