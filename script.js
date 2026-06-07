@@ -239,12 +239,13 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   const actionButton = event.target.closest("[data-action]");
   if (!actionButton) return;
 
-  if (actionButton.dataset.action === "postpone") {
-    const postponeTodo = {
-      id: actionButton.dataset.id,
-      dateKey: actionButton.dataset.dateKey
-    };
+  const action = actionButton.dataset.action;
+  const todoId = actionButton.dataset.id;
+  const todoDateKey = actionButton.dataset.dateKey || selectedDateKey;
 
+  // 1️⃣ 미루기 버튼 처리
+  if (action === "postpone") {
+    const postponeTodo = { id: todoId, dateKey: actionButton.dataset.dateKey };
     const isSamePostponeTodo =
       Boolean(pendingPostponeTodo) &&
       pendingPostponeTodo.id === postponeTodo.id &&
@@ -255,6 +256,43 @@ priorityGroupsContainer.addEventListener("click", (event) => {
     renderTodoList();
     return;
   }
+
+  // 2️⃣ 삭제(X) 버튼 처리
+  if (action === "delete") {
+    todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
+    if (todosByDate[todoDateKey].length === 0) {
+      delete todosByDate[todoDateKey];
+    }
+    saveTodos(); renderCalendar(); renderTodoList();
+    return;
+  }
+
+  // 3️⃣ 수정(✏️) 버튼 처리
+  if (action === "edit") {
+    const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (todo) {
+      editingTodoId = todo.id;
+      editingDateKey = todoDateKey;
+      modalTitle.textContent = "일정 수정";
+      modalTextInput.value = todo.text;
+      modalPriority.value = todo.priority || "medium";
+      modalCategory.value = todo.category || "personal";
+      todoModal.style.display = "flex";
+    }
+    return;
+  }
+
+  // 4️⃣ 상태 뱃지(진행전/진행중) 버튼 처리 🌟
+  if (action === "toggle-status") {
+    const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (todo) {
+      todo.status = todo.status === "in-progress" ? "pending" : "in-progress";
+      saveTodos();
+      renderTodoList();
+    }
+    return;
+  }
+});
 
   if (actionButton.dataset.action !== "delete") return;
 
