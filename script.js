@@ -356,9 +356,14 @@ function openTrashModal() {
       restoreBtn.textContent = "복원";
       restoreBtn.addEventListener("click", () => {
         todosByDate[todo.dateKey] = [...getTodosForDate(todo.dateKey), {
-          id: crypto.randomUUID(), text: todo.text,
-          completed: false, priority: todo.priority || "medium",
-          category: todo.category || "personal"
+          id: crypto.randomUUID(),
+          text: todo.text,
+          completed: todo.completed || false,       // 🌟 삭제 전 완료 여부 복구
+          status: todo.status || "pending",         // 🌟 삭제 전 상태(진행전/중/완료) 복구
+          priority: todo.priority || "medium",
+          category: todo.category || "personal",
+          fertGiven: todo.fertGiven,                // 비료 지급 여부 복구
+          wasProcrastinated: todo.wasProcrastinated // 미루기 여부 복구
         }];
         deletedTodos.splice(idx, 1);
         saveTodos();
