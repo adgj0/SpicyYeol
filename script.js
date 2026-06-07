@@ -64,6 +64,13 @@ let pendingPostponeTodo = null;
 let isJournalEditing = false;
 let journalMessage = "";
 
+const categoryMap = {
+  study: "학업",
+  personal: "개인",
+  team: "팀플",
+  work: "업무"
+};
+
 function updateCalendarTaskPanelPosition() {
   if (!calendarPanel || !calendarTaskPanel) return;
 
