@@ -814,10 +814,7 @@ button {
 .todo-form {
   grid-template-columns: minmax(0, 1fr) 86px;
 }
-.todo-item {
-  /* 체크박스 | 제목 | 카테고리 | 디데이 | 수정 | 삭제 */
-  grid-template-columns: 28px minmax(0, 1fr) auto auto 32px 32px;
-}
+
 
 /* 🌟 카테고리 뱃지 & 수정 버튼 */
 .todo-category {
@@ -829,6 +826,36 @@ button {
   background: transparent; color: var(--accent); font-size: 1.1rem;
 }
 .edit-button:hover { background: rgba(47, 125, 92, 0.1); }
+
+/* ===== 🌟 상태 필터 탭 & 뱃지 디자인 ===== */
+.filter-tabs {
+  display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+}
+.filter-tab {
+  padding: 6px 14px; border: 1px solid var(--line); border-radius: 20px;
+  background: #fff; color: var(--muted); font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.filter-tab.active {
+  background: var(--ink); color: #fff; border-color: var(--ink);
+}
+
+/* 🌟 기존 6칸짜리 리스트를 7칸으로 늘려줍니다! */
+.todo-item {
+  grid-template-columns: 28px minmax(0, 1fr) auto auto auto 32px 32px;
+  gap: 6px;
+}
+
+.status-badge {
+  font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; border: none;
+  font-weight: 800; cursor: pointer; white-space: nowrap; transition: 0.2s;
+}
+.status-pending { background: #f2eee5; color: #888; }
+.status-in-progress { background: #e3f2fd; color: #1976d2; }
+.status-badge:hover { filter: brightness(0.95); }
+
+@media (max-width: 480px) {
+  .status-badge { padding: 4px 6px; font-size: 0.7rem; letter-spacing: -0.5px; }
+}
 
 /* 🌟 팝업창(모달) 디자인 */
 .modal-overlay {
