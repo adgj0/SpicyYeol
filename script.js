@@ -517,6 +517,10 @@ if (urgentTodo) {
     dDay.className = "todo-dday";
     dDay.textContent = formatDDay(todo.daysLeft);
 
+    const categoryBadge = document.createElement("span");
+      categoryBadge.className = "todo-category";
+      categoryBadge.textContent = categoryMap[todo.category || "personal"];
+
     if (todo.daysLeft <= 3) {
       dDay.style.background = "#cc0000";
       dDay.style.color = "#ffffff";
