@@ -421,11 +421,11 @@ function renderTodoList() {
 
 
   if (currentFilter === "pending") {
-    todos = todos.filter(t => !t.completed && (t.status || "pending") == "pending");
+    todos = todos.filter(t => !t.completed && t.status === "pending");
   } else if (currentFilter === "in-progress") {
-    todos = todos.filter(t => !t.completed && (t.status || "pending") === "in-progress");
+    todos = todos.filter(t => !t.completed && t.status === "in-progress");
   } else if (currentFilter === "completed") {
-    todos = todos.filter(t => t.completed == true);
+    todos = todos.filter(t => t.completed);
   }
 
   // 🌟 2. 완료된 항목은 밑으로, 위급은 위로 정렬
