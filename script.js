@@ -481,8 +481,17 @@ function renderTodoList() {
     // 🌟 3. 진행 상태 뱃지 만들기
     const statusBadge = document.createElement("button");
     statusBadge.type = "button";
+    const statusBadge = document.createElement("button");
+    const statusClass = todo.completed ? 'status-completed' : todo.status === 'in-progress' ? 'status-in-progress' : 'status-pending';
+    const statusText = todo.completed ? "완료" : todo.status === 'in-progress' ? "진행중" : "진행전";
+    statusBadge.className = `status-badge ${statusClass}`;
+    statusBadge.textContent = statusText;
+    if (todo.completed) statusBadge.disabled = true;
+    if (todo.completed) statusBadge.disabled = true;
+
     statusBadge.className = `status-badge ${todo.status === 'in-progress' ? 'status-in-progress' : 'status-pending'}`;
     statusBadge.textContent = todo.status === 'in-progress' ? "진행중" : "진행전";
+
     statusBadge.dataset.action = "toggle-status";
     statusBadge.dataset.id = todo.id;
     statusBadge.dataset.dateKey = todo.dateKey;
