@@ -311,7 +311,73 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   }
 });
 
+function loadDeletedTodos() {
+  try {
+    const saved = localStorage.getItem(TRASH_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
 
+function saveDeletedTodos() {
+  localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(deletedTodos));
+}
+
+function openTrashModal() {
+  const modal = document.querySelector("#trashModal");
+  const list = document.querySelector("#trashList");
+  const empty = document.querySelector("#trashEmpty");
+  list.innerHTML = "";
+
+  if (deletedTodos.length === 0) {
+    empty.style.display = "block";
+  } else {
+    empty.style.display = "none";
+    deletedTodos.forEach((todo, idx) => {
+      const li = document.createElement("li");
+      li.className = "trash-item";
+
+      const info = document.createElement("div");
+      info.className = "trash-info";
+
+      const name = document.createElement("span");
+      name.className = "trash-text";
+      name.textContent = todo.text;
+
+      const date = document.createElement("span");
+      date.className = "trash-date";
+      date.textContent = `${todo.dateKey} 삭제됨`;
+
+      info.append(name, date);
+
+      const restoreBtn = document.createElement("button");
+      restoreBtn.type = "button";
+      restoreBtn.className = "restore-btn";
+      restoreBtn.textContent = "복원";
+      restoreBtn.addEventListener("click", () => {
+        todosByDate[todo.dateKey] = [...getTodosForDate(todo.dateKey), {
+          id: crypto.randomUUID(), text: todo.text,
+          completed: false, priority: todo.priority || "medium",
+          category: todo.category || "personal"
+        }];
+        deletedTodos.splice(idx, 1);
+        saveTodos();
+        saveDeletedTodos();
+        renderCalendar();
+        renderTodoList();
+        openTrashModal();
+      });
+
+      li.append(info, restoreBtn);
+      list.appendChild(li);
+    });
+  }
+  modal.style.display = "flex";
+}
+
+document.querySelector("#trashBtn").addEventListener("click", openTrashModal);
+document.querySelector("#trashCloseBtn").addEventListener("click", () => {
+  document.querySelector("#trashModal").style.display = "none";
+});
 
 function renderCalendar() {
   calendarGrid.innerHTML = "";
