@@ -876,3 +876,38 @@ button {
 .modal-actions button { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 800; }
 .cancel-btn { background: #f2eee5; color: var(--muted); }
 .save-btn { background: var(--accent); color: white; }
+
+.trash-btn {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--line); background: #fff;
+  color: var(--danger); cursor: pointer; transition: 0.2s;
+}
+.trash-btn:hover { background: rgba(185,74,72,0.08); border-color: var(--danger); }
+.trash-btn:hover::after {
+  content: "삭제 기록 보기";
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: #22201c; color: #fff; font-size: 0.75rem;
+  white-space: nowrap; padding: 4px 8px; border-radius: 6px;
+  pointer-events: none; z-index: 100;
+}
+.trash-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 320px; overflow-y: auto;
+}
+.trash-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fafafa;
+}
+.trash-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.trash-text { font-size: 0.92rem; color: var(--ink); overflow-wrap: anywhere; }
+.trash-date { font-size: 0.78rem; color: var(--muted); }
+.restore-btn {
+  flex-shrink: 0; padding: 5px 12px; border-radius: 8px;
+  border: 1px solid var(--accent); background: #fff;
+  color: var(--accent); font-size: 0.82rem; font-weight: 800; cursor: pointer;
+}
+.restore-btn:hover { background: var(--accent); color: #fff; }
