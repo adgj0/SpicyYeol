@@ -105,6 +105,7 @@ modalSaveBtn.addEventListener("click", () => {
   } else { // 새로 추가할 때
     const newTodo = {
       id: crypto.randomUUID(), text, completed: false,
+      status: "pending",
       priority: modalPriority.value, category: modalCategory.value
     };
     todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
