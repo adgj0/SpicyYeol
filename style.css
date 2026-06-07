@@ -311,7 +311,7 @@ button {
   gap: 4px;
   aspect-ratio: 1;
   min-width: 0;
-  border: 1px solid transparent;
+  border: 1px solid rgba(120, 110, 92, 0.18);
   border-radius: 8px;
   padding: 8px;
   background: #ffffff;
@@ -352,7 +352,7 @@ button {
 .day-button.is-muted.is-past:not(.is-selected) {
   color: #aaa49a;
   background: #f8f4ea;
-  border-color: transparent;
+  border-color: rgba(120, 110, 92, 0.14);
 }
 
 .day-button.is-today {
@@ -360,6 +360,7 @@ button {
 }
 
 .day-button.is-selected {
+  border-color: rgba(32, 90, 66, 0.55);
   background: var(--accent);
   color: #ffffff;
 }
