@@ -78,6 +78,37 @@
         </section>
     </main>
 
+    <div id="todoModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modalTitle">일정 추가</h3>
+            <input type="text" id="modalTextInput" placeholder="할 일 제목을 입력하세요">
+
+            <div class="modal-field">
+                <label>❗중요도❗</label>
+                <select id="modalPriority">
+                    <option value="high">높음</option>
+                    <option value="medium" selected>중간</option>
+                    <option value="low">낮음</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label>📁 카테고리</label>
+                <select id="modalCategory">
+                    <option value="study">학업</option>
+                    <option value="personal" selected>개인</option>
+                    <option value="team">팀플</option>
+                    <option value="work">업무</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="modalCancelBtn" class="cancel-btn">취소</button>
+                <button type="button" id="modalSaveBtn" class="save-btn">저장</button>
+            </div>
+        </div>
+    </div>
+
     <script src="sunflower/sunflowerConstants.js"></script>
     <script src="sunflower/sunflowerDrawUtils.js"></script>
     <script src="sunflower/SunflowerCanvas.js"></script>
