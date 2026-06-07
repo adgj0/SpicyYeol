@@ -129,6 +129,7 @@ button {
   z-index: 850;
   display: flex;
   align-items: flex-start;
+  gap: 8px;
   width: var(--calendar-task-width, 100%);
   min-height: 118px;
   margin-top: 0;
@@ -147,7 +148,8 @@ button {
   width: auto;
 }
 
-.journal-button {
+.journal-button,
+.task-panel-button {
   border: 0;
   border-radius: 8px;
   padding: 8px 14px;
@@ -157,8 +159,14 @@ button {
   font-weight: 800;
 }
 
-.journal-button:hover {
+.journal-button:hover,
+.task-panel-button:hover {
   background: var(--accent-dark);
+}
+
+.task-panel-button.is-active {
+  background: var(--gold);
+  color: #3a2e10;
 }
 
 .journal-panel-content {
@@ -313,6 +321,15 @@ button {
   outline-offset: -4px;
 }
 
+.calendar-panel.is-placing-sunflower .day-button {
+  cursor: copy;
+}
+
+.day-button.is-sunflower-target {
+  outline: 2px dashed rgba(224, 166, 45, 0.65);
+  outline-offset: -4px;
+}
+
 .day-button.is-muted {
   color: #aaa49a;
   background: #f8f4ea;
@@ -369,6 +386,15 @@ button {
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
+}
+
+.day-sunflower-marker {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  font-size: 1.1rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.18));
 }
 
 .day-button.is-selected .day-journal-marker {

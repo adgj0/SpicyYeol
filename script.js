@@ -54,13 +54,16 @@ SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
 const JOURNAL_STORAGE_KEY = "spicyyeol.journalsByDate";
+const SUNFLOWER_DATES_STORAGE_KEY = "spicyyeol.sunflowersByDate";
 const today = new Date();
 const todayKey = toDateKey(today);
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = todayKey;
 let todosByDate = loadTodos();
 let journalsByDate = loadJournals();
+let sunflowersByDate = loadSunflowers();
 let pendingPostponeTodo = null;
+let isSunflowerPlacementMode = false;
 let isJournalEditing = false;
 let journalMessage = "";
 let editingTodoId = null;
@@ -148,6 +151,27 @@ document.querySelector("#nextMonth").addEventListener("click", () => {
 });
 
 calendarTaskPanel.addEventListener("click", (event) => {
+  const sunflowerButton = event.target.closest("[data-action='place-sunflower']");
+  if (sunflowerButton) {
+    isSunflowerPlacementMode = !isSunflowerPlacementMode;
+    pendingPostponeTodo = null;
+    renderCalendar();
+    return;
+  }
+
+  const deleteJournalButton = event.target.closest("[data-journal-action='delete']");
+  if (deleteJournalButton) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    delete journalsByDate[selectedDateKey];
+    isJournalEditing = false;
+    journalMessage = "";
+    saveJournals();
+    renderCalendar();
+    renderJournalPanel();
+    return;
+  }
+
   if (!event.target.closest(".journal-button")) return;
 
   if (!canWriteJournalForSelectedDate()) {
@@ -390,6 +414,12 @@ function renderCalendar() {
   currentMonthLabel.textContent = formatMonth(visibleDate);
   postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
   postponeGuide.setAttribute("aria-hidden", pendingPostponeTodo ? "false" : "true");
+  calendarPanel.classList.toggle("is-placing-sunflower", isSunflowerPlacementMode);
+  const sunflowerButton = calendarTaskPanel.querySelector("[data-action='place-sunflower']");
+  if (sunflowerButton) {
+    sunflowerButton.classList.toggle("is-active", isSunflowerPlacementMode);
+    sunflowerButton.setAttribute("aria-pressed", isSunflowerPlacementMode ? "true" : "false");
+  }
 
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth();
@@ -405,6 +435,7 @@ function renderCalendar() {
     const todos = todosByDate[dateKey] || [];
     const activeTodos = todos.filter((todo) => !todo.completed);
     const hasJournal = Boolean(journalsByDate[dateKey]);
+    const hasSunflower = Boolean(sunflowersByDate[dateKey]);
 
     const dayNumber = document.createElement("span");
     dayNumber.className = "day-number";
@@ -458,11 +489,36 @@ function renderCalendar() {
       button.classList.add("has-journal");
     }
 
+    if (hasSunflower) {
+      const sunflowerMarker = document.createElement("span");
+      sunflowerMarker.className = "day-sunflower-marker";
+      sunflowerMarker.textContent = "🌻";
+      sunflowerMarker.setAttribute("aria-hidden", "true");
+      button.appendChild(sunflowerMarker);
+      button.classList.add("has-sunflower");
+    }
+
     if (pendingPostponeTodo) {
       button.classList.add("is-postpone-target");
     }
 
+    if (isSunflowerPlacementMode) {
+      button.classList.add("is-sunflower-target");
+    }
+
     button.addEventListener("click", () => {
+      if (isSunflowerPlacementMode) {
+        sunflowersByDate[dateKey] = true;
+        isSunflowerPlacementMode = false;
+        selectedDateKey = dateKey;
+        visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
+        saveSunflowers();
+        renderCalendar();
+        renderTodoList();
+        renderJournalPanel();
+        return;
+      }
+
       if (pendingPostponeTodo) {
         postponeTodoToDate(pendingPostponeTodo, dateKey);
         pendingPostponeTodo = null;
@@ -746,16 +802,17 @@ function formatFullDate(date) {
 function getCalendarDateLabel(date, todos, hasJournal = false) {
   const dateLabel = formatFullDate(date);
   const journalLabel = hasJournal ? ", \uc77c\uae30 \uc788\uc74c" : "";
+  const sunflowerLabel = sunflowersByDate[toDateKey(date)] ? ", \ud574\ubc14\ub77c\uae30 \uc788\uc74c" : "";
 
   if (todos.length === 0) {
-    return `${dateLabel}${journalLabel}`;
+    return `${dateLabel}${journalLabel}${sunflowerLabel}`;
   }
 
   const todoLabel = todos.map((todo) => todo.text).join(", ");
   if (hasJournal) {
-    return `${dateLabel}${journalLabel}, \ud560 \uc77c ${todos.length}\uac1c: ${todoLabel}`;
+    return `${dateLabel}${journalLabel}${sunflowerLabel}, \ud560 \uc77c ${todos.length}\uac1c: ${todoLabel}`;
   }
-  return `${dateLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
+  return `${dateLabel}${sunflowerLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
 }
 
 function getTodosForSelectedDate() {
@@ -852,6 +909,20 @@ function loadJournals() {
 
 function saveJournals() {
   localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalsByDate));
+}
+
+function loadSunflowers() {
+  try {
+    const savedSunflowers = localStorage.getItem(SUNFLOWER_DATES_STORAGE_KEY);
+    return savedSunflowers ? JSON.parse(savedSunflowers) : {};
+  } catch (error) {
+    console.warn("Saved sunflowers could not be loaded.", error);
+    return {};
+  }
+}
+
+function saveSunflowers() {
+  localStorage.setItem(SUNFLOWER_DATES_STORAGE_KEY, JSON.stringify(sunflowersByDate));
 }
 
 renderCalendar();
