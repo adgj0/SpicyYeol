@@ -73,6 +73,19 @@ const categoryMap = {
   work: "업무"
 };
 
+// 🌟 탭 요소 및 현재 상태 변수
+const filterTabsContainer = document.querySelector("#filterTabs");
+let currentFilter = "all";
+
+// 🌟 탭 클릭 시 리스트 다시 그리기
+filterTabsContainer.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("filter-tab")) return;
+  document.querySelectorAll(".filter-tab").forEach(tab => tab.classList.remove("active"));
+  e.target.classList.add("active");
+  currentFilter = e.target.dataset.filter;
+  renderTodoList();
+});
+
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
 
