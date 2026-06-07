@@ -488,7 +488,7 @@ function renderTodoList() {
     } else {
       statusBadge.className = `status-badge ${todo.status === 'in-progress' ? 'status-in-progress' : 'status-pending'}`;
       statusBadge.textContent = todo.status === 'in-progress' ? "진행중" : "진행전";
-    }tusBadge.textContent = todo.status === 'in-progress' ? "진행중" : "진행전";
+    }
 
     statusBadge.dataset.action = "toggle-status";
     statusBadge.dataset.id = todo.id;
