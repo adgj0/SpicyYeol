@@ -39,6 +39,7 @@ const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
+const modalDateInput = document.querySelector("#modalDateInput");
 const modalPriority = document.querySelector("#modalPriority");
 const modalCategory = document.querySelector("#modalCategory");
 const modalSaveBtn = document.querySelector("#modalSaveBtn");
@@ -98,25 +99,53 @@ modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none")
 // 팝업 저장 (추가/수정 공통)
 modalSaveBtn.addEventListener("click", () => {
   const text = modalTextInput.value.trim();
-  if (!text) return;
+  if (!text) {
+    modalTextInput.focus();
+    return;
+  }
 
-  const targetDateKey = editingDateKey || selectedDateKey;
+  const targetDateKey = modalDateInput.value || editingDateKey || selectedDateKey;
+  if (!targetDateKey) return;
 
   if (editingTodoId) { // 수정일 때
-    todosByDate[targetDateKey] = getTodosForDate(targetDateKey).map(t =>
-      t.id === editingTodoId ? { ...t, text, priority: modalPriority.value, category: modalCategory.value } : t
-    );
+    const sourceDateKey = editingDateKey || selectedDateKey;
+    const todoToEdit = getTodosForDate(sourceDateKey).find(t => t.id === editingTodoId);
+    if (!todoToEdit) return;
+
+    const updatedTodo = {
+      ...todoToEdit,
+      text,
+      priority: modalPriority.value,
+      category: modalCategory.value
+    };
+
+    if (sourceDateKey === targetDateKey) {
+      todosByDate[targetDateKey] = getTodosForDate(targetDateKey).map(t =>
+        t.id === editingTodoId ? updatedTodo : t
+      );
+    } else {
+      todosByDate[sourceDateKey] = getTodosForDate(sourceDateKey).filter(t => t.id !== editingTodoId);
+      if (todosByDate[sourceDateKey].length === 0) {
+        delete todosByDate[sourceDateKey];
+      }
+      todosByDate[targetDateKey] = [...getTodosForDate(targetDateKey), updatedTodo];
+    }
   } else { // 새로 추가할 때
     const newTodo = {
       id: crypto.randomUUID(), text, completed: false,
       status: "pending",
       priority: modalPriority.value, category: modalCategory.value
     };
-    todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
+    todosByDate[targetDateKey] = [...getTodosForDate(targetDateKey), newTodo];
   }
 
   todoModal.style.display = "none";
   todoInput.value = "";
+  selectedDateKey = targetDateKey;
+  const targetDate = fromDateKey(targetDateKey);
+  visibleDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+  editingTodoId = null;
+  editingDateKey = null;
   saveTodos(); renderCalendar(); renderTodoList();
 });
 
@@ -260,16 +289,17 @@ calendarJournalPanel.addEventListener("click", (event) => {
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = todoInput.value.trim();
-  if (!text) return;
 
   editingTodoId = null;
   editingDateKey = null;
   modalTitle.textContent = "일정 추가";
   modalTextInput.value = text;
+  modalDateInput.value = selectedDateKey;
   modalPriority.value = "medium";
   modalCategory.value = "personal";
 
   todoModal.style.display = "flex";
+  modalTextInput.focus();
 });
 
 
@@ -354,6 +384,7 @@ priorityGroupsContainer.addEventListener("click", (event) => {
       editingDateKey = todoDateKey;
       modalTitle.textContent = "일정 수정";
       modalTextInput.value = todo.text;
+      modalDateInput.value = todoDateKey;
       modalPriority.value = todo.priority || "medium";
       modalCategory.value = todo.category || "personal";
       todoModal.style.display = "flex";

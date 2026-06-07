@@ -45,7 +45,7 @@
         </div>
 
         <form class="todo-form" id="todoForm">
-            <input id="todoInput" type="text" placeholder="할 일을 입력하세요" autocomplete="off" required>
+            <input id="todoInput" type="text" placeholder="할 일을 입력하세요" autocomplete="off">
             <button type="submit">추가</button>
         </form>
 
@@ -107,6 +107,11 @@
         <div class="modal-content">
             <h3 id="modalTitle">일정 추가</h3>
             <input type="text" id="modalTextInput" placeholder="할 일 제목을 입력하세요">
+
+            <div class="modal-field">
+                <label for="modalDateInput">날짜</label>
+                <input type="date" id="modalDateInput" required>
+            </div>
 
             <div class="modal-field">
                 <label>❗중요도❗</label>
