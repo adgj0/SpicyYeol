@@ -129,6 +129,7 @@ button {
   z-index: 850;
   display: flex;
   align-items: flex-start;
+  gap: 8px;
   width: var(--calendar-task-width, 100%);
   min-height: 118px;
   margin-top: 0;
@@ -147,7 +148,8 @@ button {
   width: auto;
 }
 
-.journal-button {
+.journal-button,
+.task-panel-button {
   border: 0;
   border-radius: 8px;
   padding: 8px 14px;
@@ -157,7 +159,8 @@ button {
   font-weight: 800;
 }
 
-.journal-button:hover {
+.journal-button:hover,
+.task-panel-button:hover {
   background: var(--accent-dark);
 }
 
