@@ -504,7 +504,7 @@ if (urgentTodo) {
       editButton.dataset.id = todo.id;
       editButton.dataset.dateKey = todo.dateKey;
 
-    item.append(checkbox, text, dDay, editButton, deleteButton);
+    item.append(checkbox, text, categoryBadge, dDay, editButton, deleteButton);
 
     if (todo.daysLeft < 0 && !todo.completed) {
       const isActivePostpone =
@@ -526,7 +526,6 @@ if (urgentTodo) {
       item.appendChild(postponeButton);
     }
 
-    item.appendChild(deleteButton);
 
   if (todo.daysLeft <= 3) {
       todoListUrgent.appendChild(item);
