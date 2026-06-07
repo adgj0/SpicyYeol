@@ -209,35 +209,6 @@ todoForm.addEventListener("submit", (event) => {
 });
 
 
-priorityGroupsContainer.addEventListener("click", (event) => {
-  const target = event.target;
-  const todoId = target.dataset.id;
-  const todoDateKey = target.dataset.dateKey || selectedDateKey;
-
-  // X버튼 (삭제)
-  if (target.matches("[data-action='delete']")) {
-    todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
-    if (todosByDate[todoDateKey].length === 0) delete todosByDate[todoDateKey];
-    saveTodos(); renderCalendar(); renderTodoList();
-  }
-
-  // ✏️버튼 (수정)
-  if (target.matches("[data-action='edit']")) {
-    const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
-    if (todo) {
-      editingTodoId = todo.id;
-      editingDateKey = todoDateKey;
-      modalTitle.textContent = "일정 수정";
-      modalTextInput.value = todo.text;
-      modalPriority.value = todo.priority || "medium";
-      modalCategory.value = todo.category || "personal";
-      todoModal.style.display = "flex";
-    }
-  }
-});
-
-
-
 priorityGroupsContainer.addEventListener("change", (event) => {
   if (!event.target.matches("[data-action='toggle']")) return;
 
@@ -417,7 +388,6 @@ function renderTodoList() {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1;
     }
-
 
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
