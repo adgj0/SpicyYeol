@@ -534,17 +534,13 @@ function renderTodoList() {
       item.appendChild(postponeButton);
     }
 
-    if (todo.daysLeft <= 3) {
-      todoListUrgent.appendChild(item);
-    } else {
-      const itemPriority = todo.priority || "medium";
-      if (itemPriority === "high") {
-        todoListHigh.appendChild(item);
-      } else if (itemPriority === "medium") {
-        todoListMedium.appendChild(item);
-      } else {
-        todoListLow.appendChild(item);
-      }
+    // 각 방(우선순위 섹션)에 넣기
+    if (todo.daysLeft <= 3) todoListUrgent.appendChild(item);
+    else {
+      const p = todo.priority || "medium";
+      if (p === "high") todoListHigh.appendChild(item);
+      else if (p === "medium") todoListMedium.appendChild(item);
+      else todoListLow.appendChild(item);
     }
   });
   renderSunflower();
