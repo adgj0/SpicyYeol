@@ -219,28 +219,6 @@ todoForm.addEventListener("submit", (event) => {
   todoModal.style.display = "flex";
 });
 
-  const text = todoInput.value.trim();
-  if (!text) {
-    return;
-  }
-
-  const newTodo = {
-    id: crypto.randomUUID(),
-    text,
-    completed: false,
-    priority: selectedPriorityInput.value || "medium"
-  };
-
-  todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
-  todoInput.value = "";
-  selectedPriorityInput.value = "medium";
-  priorityBtn.textContent = "중요도";
-  priorityBtn.style.color = "";
-
-  saveTodos();
-  renderCalendar();
-  renderTodoList();
-});
 
 priorityGroupsContainer.addEventListener("click", (event) => {
   const target = event.target;
