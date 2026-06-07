@@ -247,25 +247,7 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   }
 });
 
-  const todoId = event.target.dataset.id;
-  const todoDateKey = event.target.dataset.dateKey || selectedDateKey;
-  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map((todo) => {
-    if (todo.id !== todoId) return todo;
-    return { ...todo, completed: event.target.checked };
-  });
 
-  const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
-  if (event.target.checked && !todo.fertGiven) {
-    const daysLeft = calculateDaysLeftFromToday(todoDateKey);
-    SunflowerState.onTaskComplete(daysLeft, Boolean(todo.wasProcrastinated));
-    todosByDate[todoDateKey] = getTodosForDate(todoDateKey).map(t =>
-      t.id === todoId ? { ...t, fertGiven: true } : t
-    );
-  }
-  saveTodos();
-  renderCalendar();
-  renderTodoList();
-});
 
 priorityGroupsContainer.addEventListener("change", (event) => {
   if (!event.target.matches("[data-action='toggle']")) return;
