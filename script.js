@@ -496,7 +496,7 @@ function renderTodoList() {
 
 
   if (currentFilter === "pending") {
-    todos = todos.filter(t => !t.completed && t.status === "pending");
+    todos = todos.filter(t => !t.completed && (t.status || "pending") === "pending");
   } else if (currentFilter === "in-progress") {
     todos = todos.filter(t => !t.completed && t.status === "in-progress");
   } else if (currentFilter === "completed") {
