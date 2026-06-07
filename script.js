@@ -34,6 +34,7 @@ const todoSectionTitle = document.querySelector(".todo-list-section .section-tit
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
+const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const modalTitle = document.querySelector("#modalTitle");
@@ -137,6 +138,13 @@ function updateCalendarTaskPanelPosition() {
 
 window.addEventListener("scroll", updateCalendarTaskPanelPosition, { passive: true });
 window.addEventListener("resize", updateCalendarTaskPanelPosition);
+
+function renderOwnedSunflowerCount() {
+  if (!ownedSunflowerCount) return;
+  ownedSunflowerCount.textContent = `해바라기: ${SunflowerState.ownedCount}개`;
+}
+
+window.addEventListener("sunflower-owned-count-change", renderOwnedSunflowerCount);
 
 
 
@@ -928,4 +936,5 @@ function saveSunflowers() {
 renderCalendar();
 renderTodoList();
 renderJournalPanel();
+renderOwnedSunflowerCount();
 updateCalendarTaskPanelPosition();
