@@ -434,21 +434,17 @@ function renderTodoList() {
 
   // 🌟 2. 완료된 항목은 밑으로, 위급은 위로 정렬
   todos = todos.sort((a, b) => {
-    if (a.completed !== b.completed) {
-      return a.completed ? 1 : -1;
-    }
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
-
     if (urgentA !== urgentB) return urgentA - urgentB;
     return a.daysLeft - b.daysLeft;
   });
 
-  const urgentTodo = todos.find(todo => todo.daysLeft <= 3);
 
-  if (urgentTodo) {
-    SunflowerState.updateMoodForUrgentTodo();
-  }
+
+  const urgentTodo = todos.find(todo => todo.daysLeft <= 3 && !todo.completed);
+  if (urgentTodo) SunflowerState.updateMoodForUrgentTodo();
 
   // 전체 완료 갯수를 세기 위해 필터링 전의 전체 목록을 사용
   const allTodos = getAllTodosWithDaysLeft();
@@ -464,6 +460,7 @@ function renderTodoList() {
   todoListMedium.innerHTML = "";
   todoListLow.innerHTML = "";
 
+  //리스트 아이템 생성 및 조립
   todos.forEach((todo) => {
     const item = document.createElement("li");
     item.className = "todo-item";
@@ -475,12 +472,10 @@ function renderTodoList() {
     checkbox.dataset.action = "toggle";
     checkbox.dataset.id = todo.id;
     checkbox.dataset.dateKey = todo.dateKey;
-    checkbox.setAttribute("aria-label", `${todo.text} 완료`);
 
     const text = document.createElement("span");
     text.className = "todo-text";
     text.textContent = todo.text;
-
     text.style.color = getDdayColor(todo.daysLeft);
 
     if (todo.daysLeft <= 3) {
@@ -508,8 +503,6 @@ function renderTodoList() {
       dDay.style.background = "#cc0000";
       dDay.style.color = "#ffffff";
     }
-    dDay.setAttribute("aria-label", `마감 ${dDay.textContent}`);
-
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "edit-button";
@@ -525,29 +518,19 @@ function renderTodoList() {
     deleteButton.dataset.action = "delete";
     deleteButton.dataset.id = todo.id;
     deleteButton.dataset.dateKey = todo.dateKey;
-    deleteButton.setAttribute("aria-label", `${todo.text} 삭제`);
 
-    // 🌟 4. 조립! (상태 뱃지 포함됨)
+    // 최종 조립 (배열 순서 맞춤)
     item.append(checkbox, text, statusBadge, categoryBadge, dDay, editButton, deleteButton);
 
-    // ✅ 기존 미루기 버튼 유지됨!
+    // 미루기 버튼 추가
     if (todo.daysLeft < 0 && !todo.completed) {
-      const isActivePostpone =
-        Boolean(pendingPostponeTodo) &&
-        pendingPostponeTodo.id === todo.id &&
-        pendingPostponeTodo.dateKey === todo.dateKey;
+      const isActivePostpone = Boolean(pendingPostponeTodo) && pendingPostponeTodo.id === todo.id;
       const postponeButton = document.createElement("button");
-      postponeButton.type = "button";
       postponeButton.className = "postpone-button";
-      postponeButton.classList.toggle("is-active", isActivePostpone);
       postponeButton.textContent = isActivePostpone ? "취소" : "미루기";
       postponeButton.dataset.action = "postpone";
       postponeButton.dataset.id = todo.id;
       postponeButton.dataset.dateKey = todo.dateKey;
-      postponeButton.setAttribute(
-        "aria-label",
-        isActivePostpone ? `${todo.text} 미루기 취소` : `${todo.text} 미루기`
-      );
       item.appendChild(postponeButton);
     }
 
@@ -564,7 +547,6 @@ function renderTodoList() {
       }
     }
   });
-
   renderSunflower();
 }
 
