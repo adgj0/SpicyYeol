@@ -294,22 +294,7 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   }
 });
 
-  if (actionButton.dataset.action !== "delete") return;
 
-
-  const todoId = actionButton.dataset.id;
-  // TodoList 표시 개선: 선택 날짜가 바뀌어도 항목이 등록된 날짜에서 정확히 삭제합니다.
-  const todoDateKey = actionButton.dataset.dateKey || selectedDateKey;
-  todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
-
-  if (todosByDate[todoDateKey].length === 0) {
-    delete todosByDate[todoDateKey];
-  }
-
-  saveTodos();
-  renderCalendar();
-  renderTodoList();
-});
 
 function renderCalendar() {
   calendarGrid.innerHTML = "";
