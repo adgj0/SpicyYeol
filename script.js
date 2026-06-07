@@ -65,6 +65,8 @@ let isJournalEditing = false;
 let journalMessage = "";
 let editingTodoId = null;
 let editingDateKey = null;
+const TRASH_STORAGE_KEY = "spicyyeol.deletedTodos";
+let deletedTodos = loadDeletedTodos();
 
 const categoryMap = {
   study: "학업",
@@ -103,6 +105,7 @@ modalSaveBtn.addEventListener("click", () => {
   } else { // 새로 추가할 때
     const newTodo = {
       id: crypto.randomUUID(), text, completed: false,
+      status: "pending",
       priority: modalPriority.value, category: modalCategory.value
     };
     todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
@@ -268,12 +271,18 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 
   // 2️⃣ 삭제(X) 버튼 처리
   if (action === "delete") {
+    const todoToDelete = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (todoToDelete) {
+        deletedTodos.unshift({ ...todoToDelete, dateKey: todoDateKey, deletedAt: new Date().toISOString() });
+        saveDeletedTodos();
+    }
     todosByDate[todoDateKey] = getTodosForDate(todoDateKey).filter((todo) => todo.id !== todoId);
     if (todosByDate[todoDateKey].length === 0) {
-      delete todosByDate[todoDateKey];
+        delete todosByDate[todoDateKey];
     }
     saveTodos(); renderCalendar(); renderTodoList();
     return;
+
   }
 
   // 3️⃣ 수정(✏️) 버튼 처리
@@ -303,7 +312,78 @@ priorityGroupsContainer.addEventListener("click", (event) => {
   }
 });
 
+function loadDeletedTodos() {
+  try {
+    const saved = localStorage.getItem(TRASH_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
 
+function saveDeletedTodos() {
+  localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(deletedTodos));
+}
+
+function openTrashModal() {
+  const modal = document.querySelector("#trashModal");
+  const list = document.querySelector("#trashList");
+  const empty = document.querySelector("#trashEmpty");
+  list.innerHTML = "";
+
+  if (deletedTodos.length === 0) {
+    empty.style.display = "block";
+  } else {
+    empty.style.display = "none";
+    deletedTodos.forEach((todo, idx) => {
+      const li = document.createElement("li");
+      li.className = "trash-item";
+
+      const info = document.createElement("div");
+      info.className = "trash-info";
+
+      const name = document.createElement("span");
+      name.className = "trash-text";
+      name.textContent = todo.text;
+
+      const date = document.createElement("span");
+      date.className = "trash-date";
+      date.textContent = `${todo.dateKey} 삭제됨`;
+
+      info.append(name, date);
+
+      const restoreBtn = document.createElement("button");
+      restoreBtn.type = "button";
+      restoreBtn.className = "restore-btn";
+      restoreBtn.textContent = "복원";
+      restoreBtn.addEventListener("click", () => {
+        todosByDate[todo.dateKey] = [...getTodosForDate(todo.dateKey), {
+          id: crypto.randomUUID(),
+          text: todo.text,
+          completed: todo.completed || false,       // 🌟 삭제 전 완료 여부 복구
+          status: todo.status || "pending",         // 🌟 삭제 전 상태(진행전/중/완료) 복구
+          priority: todo.priority || "medium",
+          category: todo.category || "personal",
+          fertGiven: todo.fertGiven,                // 비료 지급 여부 복구
+          wasProcrastinated: todo.wasProcrastinated // 미루기 여부 복구
+        }];
+        deletedTodos.splice(idx, 1);
+        saveTodos();
+        saveDeletedTodos();
+        renderCalendar();
+        renderTodoList();
+        openTrashModal();
+      });
+
+      li.append(info, restoreBtn);
+      list.appendChild(li);
+    });
+  }
+  modal.style.display = "flex";
+}
+
+document.querySelector("#trashBtn").addEventListener("click", openTrashModal);
+document.querySelector("#trashCloseBtn").addEventListener("click", () => {
+  document.querySelector("#trashModal").style.display = "none";
+});
 
 function renderCalendar() {
   calendarGrid.innerHTML = "";
@@ -421,7 +501,7 @@ function renderTodoList() {
 
 
   if (currentFilter === "pending") {
-    todos = todos.filter(t => !t.completed && t.status === "pending");
+    todos = todos.filter(t => !t.completed && (t.status || "pending") === "pending");
   } else if (currentFilter === "in-progress") {
     todos = todos.filter(t => !t.completed && t.status === "in-progress");
   } else if (currentFilter === "completed") {
