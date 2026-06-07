@@ -401,6 +401,9 @@ function renderCalendar() {
 function renderTodoList() {
   // TodoList 표시 개선: 날짜를 선택해도 체크리스트에는 모든 날짜의 TodoList를 표시하고, 남은 일수는 계산만 합니다.
   const todos = getAllTodosWithDaysLeft().sort((a, b) => {
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
 
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
