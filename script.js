@@ -206,6 +206,18 @@ calendarJournalPanel.addEventListener("click", (event) => {
 
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  const text = todoInput.value.trim();
+  if (!text) return;
+
+  editingTodoId = null;
+  editingDateKey = null;
+  modalTitle.textContent = "일정 추가";
+  modalTextInput.value = text;
+  modalPriority.value = "medium";
+  modalCategory.value = "personal";
+
+  todoModal.style.display = "flex";
+});
 
   const text = todoInput.value.trim();
   if (!text) {
