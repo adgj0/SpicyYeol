@@ -418,6 +418,14 @@ function renderTodoList() {
   // 🌟 1. 전체 데이터를 가져와서 탭(currentFilter)에 맞게 필터링!
   let todos = getAllTodosWithDaysLeft();
 
+  Object.keys(todosByDate).forEach(dateKey => {
+    todosByDate[dateKey] = todosByDate[dateKey].map(t => ({
+      ...t,
+      status: t.completed ? "completed" : (t.status === "completed" ? "pending" : t.status)
+    }));
+  });
+  saveTodos();
+
   if (currentFilter === "pending") {
     todos = todos.filter(t => !t.completed && (t.status || "pending") == "pending");
   } else if (currentFilter === "in-progress") {
