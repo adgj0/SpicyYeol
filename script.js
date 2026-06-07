@@ -405,6 +405,7 @@ function renderTodoList() {
       return a.completed ? 1 : -1;
     }
 
+
     const urgentA = a.daysLeft <= 3 ? 0 : 1;
     const urgentB = b.daysLeft <= 3 ? 0 : 1;
 
