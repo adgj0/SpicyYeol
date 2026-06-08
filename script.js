@@ -999,24 +999,65 @@ function loadSunflowers() {
 function saveSunflowers() {
   localStorage.setItem(SUNFLOWER_DATES_STORAGE_KEY, JSON.stringify(sunflowersByDate));
 }
+
+// D-day 모달 DOM 요소 선택
+const ddayModal = document.querySelector("#ddayModal");
+const ddayModalNameInput = document.querySelector("#ddayModalNameInput");
+const ddayModalDateInput = document.querySelector("#ddayModalDateInput");
+const ddayModalCategory = document.querySelector("#ddayModalCategory");
+const ddayModalCancelBtn = document.querySelector("#ddayModalCancelBtn");
+const ddayModalSaveBtn = document.querySelector("#ddayModalSaveBtn");
+
+// D-day 추가 버튼 클릭 시 모달 열기
 document.querySelector("#addDdayBtn").addEventListener("click", () => {
-  const name = prompt("D-day 이름을 입력하세요 (예: 기말고사)");
-  if (!name) return;
-  const date = prompt("날짜를 입력하세요 (예: 2026-06-20)");
-  if (!date) return;
-  ddays.push({ id: crypto.randomUUID(), name, date });
-  localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
-  renderDdays();
+  ddayModalNameInput.value = "";
+  ddayModalDateInput.value = "";
+  ddayModalCategory.value = "personal";
+  ddayModal.style.display = "flex";
 });
 
+// D-day 모달 닫기
+ddayModalCancelBtn.addEventListener("click", () => {
+  ddayModal.style.display = "none";
+});
+
+// D-day 모달 저장
+ddayModalSaveBtn.addEventListener("click", () => {
+  const name = ddayModalNameInput.value.trim();
+  const date = ddayModalDateInput.value;
+  const category = ddayModalCategory.value;
+
+  if (!name) {
+    alert("D-day 이름을 입력해주세요.");
+    ddayModalNameInput.focus();
+    return;
+  }
+  if (!date) {
+    alert("날짜를 설정해주세요.");
+    return;
+  }
+
+  ddays.push({ id: crypto.randomUUID(), name, date, category });
+  localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
+  renderDdays();
+
+  ddayModal.style.display = "none";
+});
+
+// D-day 리스트 렌더링 (카테고리 표시 포함)
 function renderDdays() {
   ddayList.innerHTML = "";
   ddays.forEach((d) => {
     const daysLeft = Math.round((new Date(d.date) - new Date(toDateKey(today))) / 86400000);
     const label = daysLeft === 0 ? "D-Day" : daysLeft > 0 ? `D-${daysLeft}` : `D+${Math.abs(daysLeft)}`;
+
+    // 카테고리 매핑
+    const catName = categoryMap[d.category || "personal"];
+
     const item = document.createElement("div");
     item.className = "dday-item";
     item.innerHTML = `
+      <span class="todo-category" style="margin-right: 4px;">${catName}</span>
       <span class="dday-name">${d.name}</span>
       <span class="dday-badge" style="color:${getDdayColor(daysLeft)}">${label}</span>
       <button class="dday-delete" data-id="${d.id}">×</button>

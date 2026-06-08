@@ -978,7 +978,8 @@ button {
 .restore-btn:hover { background: var(--accent); color: #fff; }
 
 .dday-section {
-  padding: 12px 0;
+  margin-top: -10px;
+  padding: 0 0 16px 0;
   border-bottom: 1px solid var(--line);
 }
 
@@ -1004,6 +1005,23 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 130px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.dday-list::-webkit-scrollbar {
+  width: 6px;
+}
+.dday-list::-webkit-scrollbar-track {
+  background: #f4f1e8;
+  border-radius: 4px;
+}
+.dday-list::-webkit-scrollbar-thumb {
+  background: #c8bfae;
+  border-radius: 4px;
+}
+.dday-list::-webkit-scrollbar-thumb:hover {
+  background: #a89f8e;
 }
 
 .dday-item {
