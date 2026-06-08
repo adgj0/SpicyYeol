@@ -233,6 +233,19 @@ calendarTaskPanel.addEventListener("click", (event) => {
   if (deleteJournalButton) {
     if (!confirm("정말 삭제하시겠습니까?")) return;
 
+    const journalToDelete = journalsByDate[selectedDateKey];
+    if (journalToDelete) {
+      const journal = typeof journalToDelete === "string"
+        ? { title: "일기", text: journalToDelete }
+        : journalToDelete;
+      deletedJournals.unshift({
+        ...journal,
+        dateKey: selectedDateKey,
+        deletedAt: new Date().toISOString()
+    });
+    saveDeletedJournals();
+  }
+
     delete journalsByDate[selectedDateKey];
     isJournalEditing = false;
     journalMessage = "";
