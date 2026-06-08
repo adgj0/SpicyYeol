@@ -1052,3 +1052,43 @@ button {
   font-size: 1.1rem;
   padding: 0 4px;
 }
+
+/* ===== 일기 제목 및 수정 버튼 디자인 ===== */
+.journal-title-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ink);
+  font-family: inherit;
+}
+.journal-title-input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(47, 125, 92, 0.18);
+}
+.journal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.journal-title-row strong {
+  color: var(--accent-dark);
+  font-size: 1.05rem;
+}
+.journal-edit-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.15s;
+}
+.journal-edit-btn:hover {
+  background: #f0eedb;
+  color: var(--accent);
+}
