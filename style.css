@@ -976,3 +976,61 @@ button {
   color: var(--accent); font-size: 0.82rem; font-weight: 800; cursor: pointer;
 }
 .restore-btn:hover { background: var(--accent); color: #fff; }
+
+.dday-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.dday-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dday-header button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+.dday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dday-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9f6ee;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+
+.dday-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.dday-badge {
+  font-weight: 800;
+  min-width: 48px;
+  text-align: right;
+}
+
+.dday-delete {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 1.1rem;
+  padding: 0 4px;
+}

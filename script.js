@@ -49,6 +49,8 @@ const todoListHigh = document.querySelector("#todoListHigh");
 const todoListMedium = document.querySelector("#todoListMedium");
 const todoListLow = document.querySelector("#todoListLow");
 const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer");
+const ddayList = document.querySelector("#ddayList");
+let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
 sunflowerGarden.appendChild(sfCanvas);
@@ -997,6 +999,41 @@ function loadSunflowers() {
 function saveSunflowers() {
   localStorage.setItem(SUNFLOWER_DATES_STORAGE_KEY, JSON.stringify(sunflowersByDate));
 }
+document.querySelector("#addDdayBtn").addEventListener("click", () => {
+  const name = prompt("D-day 이름을 입력하세요 (예: 기말고사)");
+  if (!name) return;
+  const date = prompt("날짜를 입력하세요 (예: 2026-06-20)");
+  if (!date) return;
+  ddays.push({ id: crypto.randomUUID(), name, date });
+  localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
+  renderDdays();
+});
+
+function renderDdays() {
+  ddayList.innerHTML = "";
+  ddays.forEach((d) => {
+    const daysLeft = Math.round((new Date(d.date) - new Date(toDateKey(today))) / 86400000);
+    const label = daysLeft === 0 ? "D-Day" : daysLeft > 0 ? `D-${daysLeft}` : `D+${Math.abs(daysLeft)}`;
+    const item = document.createElement("div");
+    item.className = "dday-item";
+    item.innerHTML = `
+      <span class="dday-name">${d.name}</span>
+      <span class="dday-badge" style="color:${getDdayColor(daysLeft)}">${label}</span>
+      <button class="dday-delete" data-id="${d.id}">×</button>
+    `;
+    ddayList.appendChild(item);
+  });
+
+  ddayList.querySelectorAll(".dday-delete").forEach(btn => {
+    btn.addEventListener("click", () => {
+      ddays = ddays.filter(d => d.id !== btn.dataset.id);
+      localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
+      renderDdays();
+    });
+  });
+}
+
+renderDdays();
 
 renderCalendar();
 renderTodoList();
