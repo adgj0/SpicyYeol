@@ -260,35 +260,6 @@ calendarTaskPanel.addEventListener("click", (event) => {
   }
 });
 
-calendarJournalPanel.addEventListener("click", (event) => {
-  const journalActionButton = event.target.closest("[data-journal-action]");
-  if (!journalActionButton) return;
-
-  if (journalActionButton.dataset.journalAction === "cancel") {
-    isJournalEditing = false;
-    journalMessage = "";
-    renderJournalPanel();
-    return;
-  }
-
-  if (journalActionButton.dataset.journalAction !== "save") return;
-
-  const journalInput = calendarJournalPanel.querySelector("#journalInput");
-  const journalText = journalInput ? journalInput.value.trim() : "";
-
-  if (journalText) {
-    journalsByDate[selectedDateKey] = journalText;
-    journalMessage = "";
-  } else {
-    delete journalsByDate[selectedDateKey];
-    journalMessage = "\ube48 \uc77c\uae30\ub294 \uc800\uc7a5\ud558\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.";
-  }
-
-  isJournalEditing = false;
-  saveJournals();
-  renderCalendar();
-  renderJournalPanel();
-});
 
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -306,6 +277,133 @@ todoForm.addEventListener("submit", (event) => {
   modalTextInput.focus();
 });
 
+// 일기 렌더링(제목 입력 & 수정 버튼) 로직 변경
+function renderJournalPanel() {
+  const rawJournal = journalsByDate[selectedDateKey];
+  // 과거 데이터 호환성 유지 (문자열이면 객체로 변환)
+  const savedJournal = typeof rawJournal === "string" ? { title: "일기", text: rawJournal } : rawJournal || null;
+
+  calendarJournalPanel.innerHTML = "";
+
+  if (!isJournalEditing && !journalMessage && !savedJournal) {
+    return;
+  }
+
+  const panelContent = document.createElement("div");
+  panelContent.className = "journal-panel-content";
+
+  if (isJournalEditing) {
+    const titleInput = document.createElement("input");
+    titleInput.id = "journalTitleInput";
+    titleInput.className = "journal-title-input";
+    titleInput.placeholder = "일기 제목을 작성해주세요.";
+    titleInput.value = savedJournal ? savedJournal.title : "";
+
+    const textarea = document.createElement("textarea");
+    textarea.id = "journalInput";
+    textarea.className = "journal-input";
+    textarea.value = savedJournal ? savedJournal.text : "";
+    textarea.placeholder = "오늘의 일기를 적어보세요.";
+
+    const actions = document.createElement("div");
+    actions.className = "journal-actions";
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.className = "journal-save-button";
+    saveButton.dataset.journalAction = "save";
+    saveButton.textContent = "저장";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "journal-cancel-button";
+    cancelButton.dataset.journalAction = "cancel";
+    cancelButton.textContent = "취소";
+
+    actions.append(saveButton, cancelButton);
+    panelContent.append(titleInput, textarea, actions);
+  } else {
+    if (journalMessage) {
+      const message = document.createElement("p");
+      message.className = "journal-message";
+      message.textContent = journalMessage;
+      panelContent.appendChild(message);
+    }
+
+    if (savedJournal) {
+      const journalView = document.createElement("article");
+      journalView.className = "journal-view";
+
+      const titleRow = document.createElement("div");
+      titleRow.className = "journal-title-row";
+
+      const title = document.createElement("strong");
+      title.textContent = savedJournal.title;
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "journal-edit-btn";
+      editBtn.title = "일기 수정"; //  마우스 오버 툴팁
+      editBtn.textContent = "✏️";
+      editBtn.dataset.journalAction = "edit";
+
+      titleRow.append(title, editBtn);
+
+      const body = document.createElement("p");
+      body.textContent = savedJournal.text;
+
+      journalView.append(titleRow, body);
+      panelContent.appendChild(journalView);
+    }
+  }
+
+  calendarJournalPanel.appendChild(panelContent);
+}
+
+// 일기 패널 내 클릭 이벤트 (저장/취소/수정)
+calendarJournalPanel.addEventListener("click", (event) => {
+  const journalActionButton = event.target.closest("[data-journal-action]");
+  if (!journalActionButton) return;
+
+  const action = journalActionButton.dataset.journalAction;
+
+  if (action === "edit") {
+    isJournalEditing = true;
+    renderJournalPanel();
+    return;
+  }
+
+  if (action === "cancel") {
+    isJournalEditing = false;
+    journalMessage = "";
+    renderJournalPanel();
+    return;
+  }
+
+  if (action === "save") {
+    const titleInput = calendarJournalPanel.querySelector("#journalTitleInput");
+    const journalInput = calendarJournalPanel.querySelector("#journalInput");
+
+    const titleText = titleInput ? titleInput.value.trim() : "";
+    const journalText = journalInput ? journalInput.value.trim() : "";
+
+    if (journalText) {
+      journalsByDate[selectedDateKey] = {
+        title: titleText || "제목 없음",
+        text: journalText
+      };
+      journalMessage = "";
+    } else {
+      delete journalsByDate[selectedDateKey];
+      journalMessage = "빈 일기는 저장하지 않았습니다.";
+    }
+
+    isJournalEditing = false;
+    saveJournals();
+    renderCalendar();
+    renderJournalPanel();
+  }
+});
 
 priorityGroupsContainer.addEventListener("change", (event) => {
   if (!event.target.matches("[data-action='toggle']")) return;
@@ -782,66 +880,7 @@ function renderSunflower() {
   }
 }
 
-function renderJournalPanel() {
-  const savedJournal = journalsByDate[selectedDateKey] || "";
-  calendarJournalPanel.innerHTML = "";
 
-  if (!isJournalEditing && !journalMessage && !savedJournal) {
-    return;
-  }
-
-  const panelContent = document.createElement("div");
-  panelContent.className = "journal-panel-content";
-
-  if (isJournalEditing) {
-    const textarea = document.createElement("textarea");
-    textarea.id = "journalInput";
-    textarea.className = "journal-input";
-    textarea.value = savedJournal;
-    textarea.placeholder = "\uc624\ub298\uc758 \uc77c\uae30\ub97c \uc801\uc5b4\ubcf4\uc138\uc694.";
-
-    const actions = document.createElement("div");
-    actions.className = "journal-actions";
-
-    const saveButton = document.createElement("button");
-    saveButton.type = "button";
-    saveButton.className = "journal-save-button";
-    saveButton.dataset.journalAction = "save";
-    saveButton.textContent = "\uc800\uc7a5";
-
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.className = "journal-cancel-button";
-    cancelButton.dataset.journalAction = "cancel";
-    cancelButton.textContent = "\ucde8\uc18c";
-
-    actions.append(saveButton, cancelButton);
-    panelContent.append(textarea, actions);
-  } else {
-    if (journalMessage) {
-      const message = document.createElement("p");
-      message.className = "journal-message";
-      message.textContent = journalMessage;
-      panelContent.appendChild(message);
-    }
-
-    if (savedJournal) {
-      const journalView = document.createElement("article");
-      journalView.className = "journal-view";
-
-      const title = document.createElement("strong");
-      title.textContent = "\uc77c\uae30";
-
-      const body = document.createElement("p");
-      body.textContent = savedJournal;
-
-      journalView.append(title, body);
-      panelContent.appendChild(journalView);
-    }
-  }
-
-  calendarJournalPanel.appendChild(panelContent);
-}
 
 function canWriteJournalForSelectedDate() {
   return selectedDateKey <= todayKey;
