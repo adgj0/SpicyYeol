@@ -33,6 +33,7 @@
         <div class="calendar-task-panel" aria-label="작업 판넬">
             <button class="journal-button" type="button">일기쓰기</button>
             <button class="task-panel-button" type="button" data-journal-action="delete">일기삭제</button>
+            <button class="task-panel-button" type="button" id="journalHistoryBtn">일기 기록</button>
             <button class="task-panel-button" type="button" data-action="place-sunflower">해바라기 붙이기</button>
             <div class="owned-sunflower-count" id="ownedSunflowerCount">해바라기: 0개</div>
         </div>
@@ -184,6 +185,36 @@
         </div>
     </div>
 
+<!-- 일기 기록 모달 (내부에 쓰레기통 버튼 포함) -->
+    <div id="journalHistoryModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0;">📜 이달의 일기 기록</h3>
+                <button type="button" id="journalTrashBtn" class="trash-btn" title="삭제한 일기 보기" aria-label="삭제한 일기 보기">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                </button>
+            </div>
+            <ul id="journalHistoryList" class="trash-list" style="margin-top: 12px;"></ul>
+            <p id="journalHistoryEmpty" style="display:none; color:#888; text-align:center; margin:16px 0;">이번 달에 작성된 일기가 없습니다.</p>
+            <div class="modal-actions">
+                <button type="button" id="journalHistoryCloseBtn" class="cancel-btn">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제된 일기(휴지통) 모달 -->
+    <div id="journalTrashModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 style="margin: 0;">🗑 삭제된 일기</h3>
+            <ul id="journalTrashList" class="trash-list" style="margin-top: 12px;"></ul>
+            <p id="journalTrashEmpty" style="display:none; color:#888; text-align:center; margin:16px 0;">삭제된 일기가 없습니다.</p>
+            <div class="modal-actions">
+                <button type="button" id="journalTrashCloseBtn" class="cancel-btn">닫기</button>
+            </div>
+        </div>
+    </div>
     <script src="sunflower/sunflowerConstants.js"></script>
     <script src="sunflower/sunflowerDrawUtils.js"></script>
     <script src="sunflower/SunflowerCanvas.js"></script>
