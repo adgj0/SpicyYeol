@@ -253,7 +253,7 @@ calendarTaskPanel.addEventListener("click", (event) => {
     renderCalendar();
     renderJournalPanel();
     return;
-  }
+}
 
   if (!event.target.closest(".journal-button")) return;
 
