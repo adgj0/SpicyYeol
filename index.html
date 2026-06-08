@@ -156,6 +156,33 @@
             </div>
         </div>
     </div>
+<!-- 중요 D-day 추가 모달 -->
+    <div id="ddayModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>D-day 추가</h3>
+            <input type="text" id="ddayModalNameInput" placeholder="D-day 이름을 입력하세요 (예: 기말고사)">
+
+            <div class="modal-field">
+                <label for="ddayModalDateInput">날짜</label>
+                <input type="date" id="ddayModalDateInput" required>
+            </div>
+
+            <div class="modal-field">
+                <label>📁 카테고리</label>
+                <select id="ddayModalCategory">
+                    <option value="study">학업</option>
+                    <option value="personal" selected>개인</option>
+                    <option value="team">팀플</option>
+                    <option value="work">업무</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="ddayModalCancelBtn" class="cancel-btn">취소</button>
+                <button type="button" id="ddayModalSaveBtn" class="save-btn">저장</button>
+            </div>
+        </div>
+    </div>
 
     <script src="sunflower/sunflowerConstants.js"></script>
     <script src="sunflower/sunflowerDrawUtils.js"></script>
