@@ -1005,6 +1005,23 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 130px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.dday-list::-webkit-scrollbar {
+  width: 6px;
+}
+.dday-list::-webkit-scrollbar-track {
+  background: #f4f1e8;
+  border-radius: 4px;
+}
+.dday-list::-webkit-scrollbar-thumb {
+  background: #c8bfae;
+  border-radius: 4px;
+}
+.dday-list::-webkit-scrollbar-thumb:hover {
+  background: #a89f8e;
 }
 
 .dday-item {
