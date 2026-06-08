@@ -517,6 +517,17 @@ function saveDeletedTodos() {
   localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(deletedTodos));
 }
 
+function loadDeletedJournals() {
+  try {
+    const saved = localStorage.getItem(JOURNAL_TRASH_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+function saveDeletedJournals() {
+  localStorage.setItem(JOURNAL_TRASH_KEY, JSON.stringify(deletedJournals));
+}
+
 function openTrashModal() {
   const modal = document.querySelector("#trashModal");
   const list = document.querySelector("#trashList");
@@ -1113,6 +1124,120 @@ function renderDdays() {
       renderDdays();
     });
   });
+}
+
+// ==========================================
+// 일기 기록 및 휴지통 모달 기능
+// ==========================================
+const journalHistoryBtn = document.querySelector("#journalHistoryBtn");
+const journalHistoryModal = document.querySelector("#journalHistoryModal");
+const journalHistoryCloseBtn = document.querySelector("#journalHistoryCloseBtn");
+const journalHistoryList = document.querySelector("#journalHistoryList");
+const journalHistoryEmpty = document.querySelector("#journalHistoryEmpty");
+
+const journalTrashBtn = document.querySelector("#journalTrashBtn");
+const journalTrashModal = document.querySelector("#journalTrashModal");
+const journalTrashCloseBtn = document.querySelector("#journalTrashCloseBtn");
+const journalTrashList = document.querySelector("#journalTrashList");
+const journalTrashEmpty = document.querySelector("#journalTrashEmpty");
+
+// 일기 기록 버튼 클릭 시 이번 달 기록 모아보기
+if (journalHistoryBtn) {
+  journalHistoryBtn.addEventListener("click", () => {
+    renderJournalHistory();
+    journalHistoryModal.style.display = "flex";
+  });
+}
+if (journalHistoryCloseBtn) {
+  journalHistoryCloseBtn.addEventListener("click", () => journalHistoryModal.style.display = "none");
+}
+
+function renderJournalHistory() {
+  journalHistoryList.innerHTML = "";
+  const yearMonthPrefix = toDateKey(visibleDate).substring(0, 7);
+
+  const entries = Object.entries(journalsByDate)
+    .filter(([dateKey]) => dateKey.startsWith(yearMonthPrefix))
+    .sort(([a], [b]) => a.localeCompare(b));
+
+  if (entries.length === 0) {
+    journalHistoryEmpty.style.display = "block";
+  } else {
+    journalHistoryEmpty.style.display = "none";
+    entries.forEach(([dateKey, rawJournal]) => {
+      const journal = typeof rawJournal === "string" ? { title: "일기", text: rawJournal } : rawJournal;
+      const li = document.createElement("li");
+      li.className = "trash-item";
+      li.innerHTML = `
+        <div class="trash-info">
+          <span class="trash-text" style="color: var(--accent-dark);"><strong>${journal.title}</strong></span>
+          <span class="trash-date">${dateKey} | ${journal.text.substring(0, 20)}${journal.text.length > 20 ? '...' : ''}</span>
+        </div>
+      `;
+      journalHistoryList.appendChild(li);
+    });
+  }
+}
+
+// 기록 모달 안에 있는 쓰레기통 클릭 시 휴지통 모달 열기
+if (journalTrashBtn) {
+  journalTrashBtn.addEventListener("click", () => {
+    renderJournalTrash();
+    journalHistoryModal.style.display = "none";
+    journalTrashModal.style.display = "flex";
+  });
+}
+if (journalTrashCloseBtn) {
+  journalTrashCloseBtn.addEventListener("click", () => journalTrashModal.style.display = "none");
+}
+
+// 삭제된 일기 렌더링 및 복원
+function renderJournalTrash() {
+  journalTrashList.innerHTML = "";
+  if (deletedJournals.length === 0) {
+    journalTrashEmpty.style.display = "block";
+  } else {
+    journalTrashEmpty.style.display = "none";
+    deletedJournals.forEach((journal, idx) => {
+      const li = document.createElement("li");
+      li.className = "trash-item";
+
+      const info = document.createElement("div");
+      info.className = "trash-info";
+
+      const title = document.createElement("span");
+      title.className = "trash-text";
+      title.style.fontWeight = "700";
+      title.textContent = journal.title;
+
+      const date = document.createElement("span");
+      date.className = "trash-date";
+      date.textContent = `${journal.dateKey} 삭제됨 | ${journal.text.substring(0, 15)}...`;
+
+      info.append(title, date);
+
+      const restoreBtn = document.createElement("button");
+      restoreBtn.type = "button";
+      restoreBtn.className = "restore-btn";
+      restoreBtn.textContent = "복원";
+      restoreBtn.addEventListener("click", () => {
+        if (journalsByDate[journal.dateKey]) {
+          if (!confirm("해당 날짜에 이미 작성된 일기가 있습니다. 덮어쓰시겠습니까?")) return;
+        }
+        journalsByDate[journal.dateKey] = { title: journal.title, text: journal.text };
+        deletedJournals.splice(idx, 1);
+
+        saveJournals();
+        saveDeletedJournals();
+        renderCalendar();
+        renderJournalPanel();
+        renderJournalTrash();
+      });
+
+      li.append(info, restoreBtn);
+      journalTrashList.appendChild(li);
+    });
+  }
 }
 
 renderDdays();
