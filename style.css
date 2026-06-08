@@ -128,7 +128,9 @@ button {
   bottom: 24px;
   z-index: 850;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
+  gap: 8px;
   width: var(--calendar-task-width, 100%);
   min-height: 118px;
   margin-top: 0;
@@ -147,7 +149,8 @@ button {
   width: auto;
 }
 
-.journal-button {
+.journal-button,
+.task-panel-button {
   border: 0;
   border-radius: 8px;
   padding: 8px 14px;
@@ -157,8 +160,22 @@ button {
   font-weight: 800;
 }
 
-.journal-button:hover {
+.journal-button:hover,
+.task-panel-button:hover {
   background: var(--accent-dark);
+}
+
+.task-panel-button.is-active {
+  background: var(--gold);
+  color: #3a2e10;
+}
+
+.owned-sunflower-count {
+  flex: 0 0 100%;
+  margin-top: auto;
+  color: var(--accent-dark);
+  font-size: 0.92rem;
+  font-weight: 800;
 }
 
 .journal-panel-content {
@@ -294,7 +311,7 @@ button {
   gap: 4px;
   aspect-ratio: 1;
   min-width: 0;
-  border: 1px solid transparent;
+  border: 1px solid rgba(120, 110, 92, 0.18);
   border-radius: 8px;
   padding: 8px;
   background: #ffffff;
@@ -313,9 +330,29 @@ button {
   outline-offset: -4px;
 }
 
+.calendar-panel.is-placing-sunflower .day-button {
+  cursor: copy;
+}
+
+.day-button.is-sunflower-target {
+  outline: 2px dashed rgba(224, 166, 45, 0.65);
+  outline-offset: -4px;
+}
+
 .day-button.is-muted {
   color: #aaa49a;
   background: #f8f4ea;
+}
+
+.day-button.is-past:not(.is-selected) {
+  background: #fbf8f1;
+  border-color: #f1eadb;
+}
+
+.day-button.is-muted.is-past:not(.is-selected) {
+  color: #aaa49a;
+  background: #f8f4ea;
+  border-color: rgba(120, 110, 92, 0.14);
 }
 
 .day-button.is-today {
@@ -323,6 +360,7 @@ button {
 }
 
 .day-button.is-selected {
+  border-color: rgba(32, 90, 66, 0.55);
   background: var(--accent);
   color: #ffffff;
 }
@@ -371,6 +409,15 @@ button {
   filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
 }
 
+.day-sunflower-marker {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  font-size: 1.1rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.18));
+}
+
 .day-button.is-selected .day-journal-marker {
   color: #ffffff;
 }
@@ -379,18 +426,36 @@ button {
   color: #c8bfae;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-journal-marker {
+  color: #4d8a69;
+}
+
 .day-button.is-selected .day-journal-marker svg,
 .day-button.is-muted .day-journal-marker svg {
   fill: rgba(255, 255, 255, 0.2);
   filter: none;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-journal-marker svg {
+  fill: rgba(255, 255, 255, 0.78);
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.12));
+}
+
 .day-button.is-selected .day-todo-dot {
   background: #ffffff;
 }
 
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-todo-dot {
+  background: #d3ad45;
+}
+
 .day-button.is-muted .day-todo-dot {
   background: #c8bfae;
+}
+
+.day-button.is-past:not(.is-muted):not(.is-selected) .day-sunflower-marker {
+  opacity: 0.96;
+  filter: drop-shadow(0 1px 0 rgba(120, 74, 25, 0.16));
 }
 
 .selected-date {
@@ -911,3 +976,61 @@ button {
   color: var(--accent); font-size: 0.82rem; font-weight: 800; cursor: pointer;
 }
 .restore-btn:hover { background: var(--accent); color: #fff; }
+
+.dday-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.dday-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dday-header button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+.dday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dday-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9f6ee;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+
+.dday-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.dday-badge {
+  font-weight: 800;
+  min-width: 48px;
+  text-align: right;
+}
+
+.dday-delete {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 1.1rem;
+  padding: 0 4px;
+}

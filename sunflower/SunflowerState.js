@@ -2,6 +2,7 @@ const SunflowerState = {
   fert: parseInt(localStorage.getItem("sf.fert") || "0"),
   inventory: parseInt(localStorage.getItem("sf.inventory") || "0"),
   growCount: parseInt(localStorage.getItem("sf.growCount") || "0"),
+  ownedCount: parseInt(localStorage.getItem("sf.ownedCount") || "0"),
   moodIdx: 0,
   log: [],
 
@@ -32,10 +33,15 @@ const SunflowerState = {
 
     if (this.fert >= 14) {
       this.growCount += 1;
+      this.ownedCount += 1;
       localStorage.setItem("sf.growCount", this.growCount);
+      localStorage.setItem("sf.ownedCount", this.ownedCount);
       this.log.unshift(`🌻 해바라기 완성! (총 ${this.growCount}개째)`);
       SunflowerPanel.refresh();
       SunflowerNavIcon.refresh();
+      window.dispatchEvent(new CustomEvent("sunflower-owned-count-change", {
+        detail: { ownedCount: this.ownedCount },
+      }));
       setTimeout(() => {
         this.fert = 0;
         localStorage.setItem("sf.fert", this.fert);

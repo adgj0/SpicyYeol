@@ -34,10 +34,12 @@ const todoSectionTitle = document.querySelector(".todo-list-section .section-tit
 const sunflowerMessage = document.querySelector("#sunflowerMessage");
 const sunflowerGarden = document.querySelector("#sunflowerGarden");
 const fertGauge = document.querySelector("#fertGauge");
+const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
+const modalDateInput = document.querySelector("#modalDateInput");
 const modalPriority = document.querySelector("#modalPriority");
 const modalCategory = document.querySelector("#modalCategory");
 const modalSaveBtn = document.querySelector("#modalSaveBtn");
@@ -47,6 +49,8 @@ const todoListHigh = document.querySelector("#todoListHigh");
 const todoListMedium = document.querySelector("#todoListMedium");
 const todoListLow = document.querySelector("#todoListLow");
 const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer");
+const ddayList = document.querySelector("#ddayList");
+let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
 sunflowerGarden.appendChild(sfCanvas);
@@ -54,13 +58,16 @@ SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
 const JOURNAL_STORAGE_KEY = "spicyyeol.journalsByDate";
+const SUNFLOWER_DATES_STORAGE_KEY = "spicyyeol.sunflowersByDate";
 const today = new Date();
 const todayKey = toDateKey(today);
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = todayKey;
 let todosByDate = loadTodos();
 let journalsByDate = loadJournals();
+let sunflowersByDate = loadSunflowers();
 let pendingPostponeTodo = null;
+let isSunflowerPlacementMode = false;
 let isJournalEditing = false;
 let journalMessage = "";
 let editingTodoId = null;
@@ -94,25 +101,53 @@ modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none")
 // 팝업 저장 (추가/수정 공통)
 modalSaveBtn.addEventListener("click", () => {
   const text = modalTextInput.value.trim();
-  if (!text) return;
+  if (!text) {
+    modalTextInput.focus();
+    return;
+  }
 
-  const targetDateKey = editingDateKey || selectedDateKey;
+  const targetDateKey = modalDateInput.value || editingDateKey || selectedDateKey;
+  if (!targetDateKey) return;
 
   if (editingTodoId) { // 수정일 때
-    todosByDate[targetDateKey] = getTodosForDate(targetDateKey).map(t =>
-      t.id === editingTodoId ? { ...t, text, priority: modalPriority.value, category: modalCategory.value } : t
-    );
+    const sourceDateKey = editingDateKey || selectedDateKey;
+    const todoToEdit = getTodosForDate(sourceDateKey).find(t => t.id === editingTodoId);
+    if (!todoToEdit) return;
+
+    const updatedTodo = {
+      ...todoToEdit,
+      text,
+      priority: modalPriority.value,
+      category: modalCategory.value
+    };
+
+    if (sourceDateKey === targetDateKey) {
+      todosByDate[targetDateKey] = getTodosForDate(targetDateKey).map(t =>
+        t.id === editingTodoId ? updatedTodo : t
+      );
+    } else {
+      todosByDate[sourceDateKey] = getTodosForDate(sourceDateKey).filter(t => t.id !== editingTodoId);
+      if (todosByDate[sourceDateKey].length === 0) {
+        delete todosByDate[sourceDateKey];
+      }
+      todosByDate[targetDateKey] = [...getTodosForDate(targetDateKey), updatedTodo];
+    }
   } else { // 새로 추가할 때
     const newTodo = {
       id: crypto.randomUUID(), text, completed: false,
       status: "pending",
       priority: modalPriority.value, category: modalCategory.value
     };
-    todosByDate[selectedDateKey] = [...getTodosForSelectedDate(), newTodo];
+    todosByDate[targetDateKey] = [...getTodosForDate(targetDateKey), newTodo];
   }
 
   todoModal.style.display = "none";
   todoInput.value = "";
+  selectedDateKey = targetDateKey;
+  const targetDate = fromDateKey(targetDateKey);
+  visibleDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+  editingTodoId = null;
+  editingDateKey = null;
   saveTodos(); renderCalendar(); renderTodoList();
 });
 
@@ -135,6 +170,42 @@ function updateCalendarTaskPanelPosition() {
 window.addEventListener("scroll", updateCalendarTaskPanelPosition, { passive: true });
 window.addEventListener("resize", updateCalendarTaskPanelPosition);
 
+function renderOwnedSunflowerCount() {
+  if (!ownedSunflowerCount) return;
+  ownedSunflowerCount.textContent = `해바라기: ${SunflowerState.ownedCount}개`;
+}
+
+window.addEventListener("sunflower-owned-count-change", renderOwnedSunflowerCount);
+
+function spendOwnedSunflower() {
+  if (SunflowerState.ownedCount <= 0) return false;
+
+  SunflowerState.ownedCount -= 1;
+  localStorage.setItem("sf.ownedCount", SunflowerState.ownedCount);
+  window.dispatchEvent(new CustomEvent("sunflower-owned-count-change", {
+    detail: { ownedCount: SunflowerState.ownedCount },
+  }));
+  SunflowerPanel.refresh();
+  SunflowerNavIcon.refresh();
+  return true;
+}
+
+function placeSunflowerOnDate(dateKey) {
+  if (sunflowersByDate[dateKey]) {
+    alert("이미 해바라기가 붙어 있는 날짜입니다.");
+    return false;
+  }
+
+  if (!spendOwnedSunflower()) {
+    alert("보유한 해바라기가 없습니다.");
+    return false;
+  }
+
+  sunflowersByDate[dateKey] = true;
+  saveSunflowers();
+  return true;
+}
+
 
 
 document.querySelector("#prevMonth").addEventListener("click", () => {
@@ -148,6 +219,27 @@ document.querySelector("#nextMonth").addEventListener("click", () => {
 });
 
 calendarTaskPanel.addEventListener("click", (event) => {
+  const sunflowerButton = event.target.closest("[data-action='place-sunflower']");
+  if (sunflowerButton) {
+    isSunflowerPlacementMode = !isSunflowerPlacementMode;
+    pendingPostponeTodo = null;
+    renderCalendar();
+    return;
+  }
+
+  const deleteJournalButton = event.target.closest("[data-journal-action='delete']");
+  if (deleteJournalButton) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    delete journalsByDate[selectedDateKey];
+    isJournalEditing = false;
+    journalMessage = "";
+    saveJournals();
+    renderCalendar();
+    renderJournalPanel();
+    return;
+  }
+
   if (!event.target.closest(".journal-button")) return;
 
   if (!canWriteJournalForSelectedDate()) {
@@ -199,16 +291,17 @@ calendarJournalPanel.addEventListener("click", (event) => {
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = todoInput.value.trim();
-  if (!text) return;
 
   editingTodoId = null;
   editingDateKey = null;
   modalTitle.textContent = "일정 추가";
   modalTextInput.value = text;
+  modalDateInput.value = selectedDateKey;
   modalPriority.value = "medium";
   modalCategory.value = "personal";
 
   todoModal.style.display = "flex";
+  modalTextInput.focus();
 });
 
 
@@ -293,6 +386,7 @@ priorityGroupsContainer.addEventListener("click", (event) => {
       editingDateKey = todoDateKey;
       modalTitle.textContent = "일정 수정";
       modalTextInput.value = todo.text;
+      modalDateInput.value = todoDateKey;
       modalPriority.value = todo.priority || "medium";
       modalCategory.value = todo.category || "personal";
       todoModal.style.display = "flex";
@@ -390,6 +484,12 @@ function renderCalendar() {
   currentMonthLabel.textContent = formatMonth(visibleDate);
   postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
   postponeGuide.setAttribute("aria-hidden", pendingPostponeTodo ? "false" : "true");
+  calendarPanel.classList.toggle("is-placing-sunflower", isSunflowerPlacementMode);
+  const sunflowerButton = calendarTaskPanel.querySelector("[data-action='place-sunflower']");
+  if (sunflowerButton) {
+    sunflowerButton.classList.toggle("is-active", isSunflowerPlacementMode);
+    sunflowerButton.setAttribute("aria-pressed", isSunflowerPlacementMode ? "true" : "false");
+  }
 
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth();
@@ -405,6 +505,7 @@ function renderCalendar() {
     const todos = todosByDate[dateKey] || [];
     const activeTodos = todos.filter((todo) => !todo.completed);
     const hasJournal = Boolean(journalsByDate[dateKey]);
+    const hasSunflower = Boolean(sunflowersByDate[dateKey]);
 
     const dayNumber = document.createElement("span");
     dayNumber.className = "day-number";
@@ -441,6 +542,10 @@ function renderCalendar() {
       button.classList.add("is-muted");
     }
 
+    if (dateKey < todayKey) {
+      button.classList.add("is-past");
+    }
+
     if (dateKey === toDateKey(today)) {
       button.classList.add("is-today");
     }
@@ -458,11 +563,37 @@ function renderCalendar() {
       button.classList.add("has-journal");
     }
 
+    if (hasSunflower) {
+      const sunflowerMarker = document.createElement("span");
+      sunflowerMarker.className = "day-sunflower-marker";
+      sunflowerMarker.textContent = "🌻";
+      sunflowerMarker.setAttribute("aria-hidden", "true");
+      button.appendChild(sunflowerMarker);
+      button.classList.add("has-sunflower");
+    }
+
     if (pendingPostponeTodo) {
       button.classList.add("is-postpone-target");
     }
 
+    if (isSunflowerPlacementMode) {
+      button.classList.add("is-sunflower-target");
+    }
+
     button.addEventListener("click", () => {
+      if (isSunflowerPlacementMode) {
+        const placed = placeSunflowerOnDate(dateKey);
+        isSunflowerPlacementMode = false;
+        selectedDateKey = dateKey;
+        visibleDate = new Date(date.getFullYear(), date.getMonth(), 1);
+        renderCalendar();
+        if (placed) {
+          renderTodoList();
+          renderJournalPanel();
+        }
+        return;
+      }
+
       if (pendingPostponeTodo) {
         postponeTodoToDate(pendingPostponeTodo, dateKey);
         pendingPostponeTodo = null;
@@ -746,16 +877,17 @@ function formatFullDate(date) {
 function getCalendarDateLabel(date, todos, hasJournal = false) {
   const dateLabel = formatFullDate(date);
   const journalLabel = hasJournal ? ", \uc77c\uae30 \uc788\uc74c" : "";
+  const sunflowerLabel = sunflowersByDate[toDateKey(date)] ? ", \ud574\ubc14\ub77c\uae30 \uc788\uc74c" : "";
 
   if (todos.length === 0) {
-    return `${dateLabel}${journalLabel}`;
+    return `${dateLabel}${journalLabel}${sunflowerLabel}`;
   }
 
   const todoLabel = todos.map((todo) => todo.text).join(", ");
   if (hasJournal) {
-    return `${dateLabel}${journalLabel}, \ud560 \uc77c ${todos.length}\uac1c: ${todoLabel}`;
+    return `${dateLabel}${journalLabel}${sunflowerLabel}, \ud560 \uc77c ${todos.length}\uac1c: ${todoLabel}`;
   }
-  return `${dateLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
+  return `${dateLabel}${sunflowerLabel}, 할 일 ${todos.length}개: ${todoLabel}`;
 }
 
 function getTodosForSelectedDate() {
@@ -854,7 +986,57 @@ function saveJournals() {
   localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalsByDate));
 }
 
+function loadSunflowers() {
+  try {
+    const savedSunflowers = localStorage.getItem(SUNFLOWER_DATES_STORAGE_KEY);
+    return savedSunflowers ? JSON.parse(savedSunflowers) : {};
+  } catch (error) {
+    console.warn("Saved sunflowers could not be loaded.", error);
+    return {};
+  }
+}
+
+function saveSunflowers() {
+  localStorage.setItem(SUNFLOWER_DATES_STORAGE_KEY, JSON.stringify(sunflowersByDate));
+}
+document.querySelector("#addDdayBtn").addEventListener("click", () => {
+  const name = prompt("D-day 이름을 입력하세요 (예: 기말고사)");
+  if (!name) return;
+  const date = prompt("날짜를 입력하세요 (예: 2026-06-20)");
+  if (!date) return;
+  ddays.push({ id: crypto.randomUUID(), name, date });
+  localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
+  renderDdays();
+});
+
+function renderDdays() {
+  ddayList.innerHTML = "";
+  ddays.forEach((d) => {
+    const daysLeft = Math.round((new Date(d.date) - new Date(toDateKey(today))) / 86400000);
+    const label = daysLeft === 0 ? "D-Day" : daysLeft > 0 ? `D-${daysLeft}` : `D+${Math.abs(daysLeft)}`;
+    const item = document.createElement("div");
+    item.className = "dday-item";
+    item.innerHTML = `
+      <span class="dday-name">${d.name}</span>
+      <span class="dday-badge" style="color:${getDdayColor(daysLeft)}">${label}</span>
+      <button class="dday-delete" data-id="${d.id}">×</button>
+    `;
+    ddayList.appendChild(item);
+  });
+
+  ddayList.querySelectorAll(".dday-delete").forEach(btn => {
+    btn.addEventListener("click", () => {
+      ddays = ddays.filter(d => d.id !== btn.dataset.id);
+      localStorage.setItem("spicyyeol.ddays", JSON.stringify(ddays));
+      renderDdays();
+    });
+  });
+}
+
+renderDdays();
+
 renderCalendar();
 renderTodoList();
 renderJournalPanel();
+renderOwnedSunflowerCount();
 updateCalendarTaskPanelPosition();
