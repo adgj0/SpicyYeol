@@ -58,6 +58,9 @@ const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer
 const ddayList = document.querySelector("#ddayList");
 const frequentPostponeCategory = document.querySelector("#frequentPostponeCategory");
 const frequentPostponePriority = document.querySelector("#frequentPostponePriority");
+const categoryPostponeStatsModal = document.querySelector("#categoryPostponeStatsModal");
+const categoryPostponeStatsCloseBtn = document.querySelector("#categoryPostponeStatsCloseBtn");
+const categoryPostponeStatsBody = document.querySelector("#categoryPostponeStatsBody");
 let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
@@ -98,6 +101,7 @@ const categoryMap = {
   team: "팀플",
   work: "업무"
 };
+const categoryStatsOrder = ["study", "personal", "team", "work"];
 
 const priorityPostponeMessages = {
   high: "중요한 일을 자주 미루고 있어요. 오늘은 가장 중요한 일 하나만 먼저 끝내볼까요?",
@@ -120,6 +124,27 @@ filterTabsContainer.addEventListener("click", (e) => {
 
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+if (frequentPostponeCategory && categoryPostponeStatsModal) {
+  frequentPostponeCategory.addEventListener("click", () => {
+    renderCategoryPostponeStats();
+    categoryPostponeStatsModal.style.display = "flex";
+  });
+}
+
+if (categoryPostponeStatsCloseBtn && categoryPostponeStatsModal) {
+  categoryPostponeStatsCloseBtn.addEventListener("click", () => {
+    categoryPostponeStatsModal.style.display = "none";
+  });
+}
+
+if (categoryPostponeStatsModal) {
+  categoryPostponeStatsModal.addEventListener("click", (event) => {
+    if (event.target === categoryPostponeStatsModal) {
+      categoryPostponeStatsModal.style.display = "none";
+    }
+  });
+}
 
 if (pastIncompleteCancelBtn) {
   pastIncompleteCancelBtn.addEventListener("click", () => {
@@ -1434,6 +1459,58 @@ function getPostponeCountsByCategory(history = postponeHistory) {
   }, {}));
 }
 
+function renderCategoryPostponeStats() {
+  if (!categoryPostponeStatsBody) return;
+
+  const counts = getPostponeCountsByCategory();
+  const totalCount = categoryStatsOrder.reduce((total, category) => total + (counts[category] || 0), 0);
+
+  categoryPostponeStatsBody.innerHTML = "";
+
+  if (totalCount === 0) {
+    const emptyMessage = document.createElement("p");
+    emptyMessage.className = "modal-message";
+    emptyMessage.textContent = "아직 미루기 기록이 없습니다.";
+    categoryPostponeStatsBody.appendChild(emptyMessage);
+    return;
+  }
+
+  const maxCount = Math.max(...categoryStatsOrder.map((category) => counts[category] || 0));
+
+  categoryStatsOrder.forEach((category) => {
+    const count = counts[category] || 0;
+    const percent = Math.round((count / totalCount) * 100);
+    const barPercent = maxCount > 0 ? (count / maxCount) * 100 : 0;
+
+    const row = document.createElement("div");
+    row.className = "category-postpone-stat-row";
+
+    const info = document.createElement("div");
+    info.className = "category-postpone-stat-info";
+
+    const name = document.createElement("span");
+    name.className = "category-postpone-stat-name";
+    name.textContent = categoryMap[category];
+
+    const value = document.createElement("span");
+    value.className = "category-postpone-stat-value";
+    value.textContent = `${count}회 · ${percent}%`;
+
+    const track = document.createElement("div");
+    track.className = "category-postpone-stat-track";
+    track.setAttribute("aria-label", `${categoryMap[category]} ${count}회, 전체 대비 ${percent}%`);
+
+    const bar = document.createElement("div");
+    bar.className = "category-postpone-stat-bar";
+    bar.style.width = `${barPercent}%`;
+
+    info.append(name, value);
+    track.appendChild(bar);
+    row.append(info, track);
+    categoryPostponeStatsBody.appendChild(row);
+  });
+}
+
 function getMostPostponedCategory(counts = getPostponeCountsByCategory()) {
   return Object.entries(counts).reduce((mostPostponed, [category, count]) => {
     if (count < 5) return mostPostponed;
@@ -1498,6 +1575,7 @@ function renderFrequentPostponePriority() {
 function renderPostponeInsights() {
   renderFrequentPostponeCategory();
   renderFrequentPostponePriority();
+  renderCategoryPostponeStats();
 }
 
 function saveTodos() {
