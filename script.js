@@ -55,6 +55,7 @@ const todoListLow = document.querySelector("#todoListLow");
 const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer");
 const ddayList = document.querySelector("#ddayList");
 const frequentPostponeCategory = document.querySelector("#frequentPostponeCategory");
+const frequentPostponePriority = document.querySelector("#frequentPostponePriority");
 let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
@@ -1247,7 +1248,7 @@ function loadPostponeHistory() {
 function savePostponeHistory() {
   postponeHistory = getActivePostponeHistory(postponeHistory);
   localStorage.setItem(POSTPONE_HISTORY_STORAGE_KEY, JSON.stringify(postponeHistory));
-  renderFrequentPostponeCategory();
+  renderPostponeInsights();
 }
 
 function normalizePostponeHistoryEntry(entry) {
@@ -1343,12 +1344,28 @@ function getMostPostponedPriority(counts = getPostponeCountsByPriority()) {
 function renderFrequentPostponeCategory() {
   if (!frequentPostponeCategory) return;
 
-  const mostPostponed = getMostPostponedPriority();
+  const mostPostponed = getMostPostponedCategory();
 
   frequentPostponeCategory.classList.toggle("is-visible", Boolean(mostPostponed));
   frequentPostponeCategory.textContent = mostPostponed
+    ? `자주 미루는 카테고리: ${categoryMap[mostPostponed.category] || "개인"}`
+    : "";
+}
+
+function renderFrequentPostponePriority() {
+  if (!frequentPostponePriority) return;
+
+  const mostPostponed = getMostPostponedPriority();
+
+  frequentPostponePriority.classList.toggle("is-visible", Boolean(mostPostponed));
+  frequentPostponePriority.textContent = mostPostponed
     ? priorityPostponeMessages[mostPostponed.priority]
     : "";
+}
+
+function renderPostponeInsights() {
+  renderFrequentPostponeCategory();
+  renderFrequentPostponePriority();
 }
 
 function saveTodos() {
@@ -1578,6 +1595,6 @@ renderCalendar();
 renderTodoList();
 renderJournalPanel();
 renderOwnedSunflowerCount();
-renderFrequentPostponeCategory();
+renderPostponeInsights();
 renderPastIncompleteTodoModal();
 updateCalendarTaskPanelPosition();

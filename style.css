@@ -66,10 +66,10 @@ button {
   padding: 24px;
 }
 
-.frequent-postpone-category {
+.frequent-postpone-priority {
   display: none;
   max-width: 100%;
-  margin: -4px 0 14px;
+  margin: 0 0 14px;
   border: 1px solid rgba(185, 74, 72, 0.28);
   border-radius: 8px;
   padding: 10px 12px;
@@ -81,6 +81,23 @@ button {
   text-align: left;
 }
 
+.frequent-postpone-category {
+  display: none;
+  max-width: min(280px, 45vw);
+  border: 1px solid rgba(185, 74, 72, 0.28);
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #fff4ed;
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.frequent-postpone-priority.is-visible,
 .frequent-postpone-category.is-visible {
   display: block;
 }
@@ -497,6 +514,18 @@ button {
 
 .selected-date h2 {
   font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+}
+
+.selected-date-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.selected-date-main h2 {
+  min-width: 0;
 }
 
 .todo-form {
