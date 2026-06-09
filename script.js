@@ -54,6 +54,7 @@ const todoListMedium = document.querySelector("#todoListMedium");
 const todoListLow = document.querySelector("#todoListLow");
 const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer");
 const ddayList = document.querySelector("#ddayList");
+const frequentPostponeCategory = document.querySelector("#frequentPostponeCategory");
 let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
@@ -1222,7 +1223,7 @@ function loadTodos() {
 function loadPostponeHistory() {
   try {
     const savedHistory = localStorage.getItem(POSTPONE_HISTORY_STORAGE_KEY);
-    return savedHistory ? JSON.parse(savedHistory) : [];
+    return savedHistory ? JSON.parse(savedHistory).map(normalizePostponeHistoryEntry) : [];
   } catch (error) {
     console.warn("Failed to load postpone history.", error);
     return [];
@@ -1231,10 +1232,22 @@ function loadPostponeHistory() {
 
 function savePostponeHistory() {
   localStorage.setItem(POSTPONE_HISTORY_STORAGE_KEY, JSON.stringify(postponeHistory));
+  renderFrequentPostponeCategory();
+}
+
+function normalizePostponeHistoryEntry(entry) {
+  if (!entry) return entry;
+
+  return {
+    ...entry,
+    postponedDateKey: entry.postponedDateKey || toDateKey(new Date(entry.postponedAt || entry.targetDateKey || entry.sourceDateKey))
+  };
 }
 
 function recordPostponeHistory(todo, sourceDateKey, targetDateKey) {
   if (!todo) return;
+
+  const postponedAt = new Date();
 
   postponeHistory.unshift({
     id: crypto.randomUUID(),
@@ -1244,8 +1257,45 @@ function recordPostponeHistory(todo, sourceDateKey, targetDateKey) {
     targetDateKey,
     category: todo.category || "personal",
     priority: todo.priority || "medium",
-    postponedAt: new Date().toISOString()
+    postponedDateKey: toDateKey(postponedAt),
+    postponedAt: postponedAt.toISOString()
   });
+}
+
+function getPostponeCountsByCategory(history = postponeHistory) {
+  return history.reduce((counts, entry) => {
+    if (!entry) return counts;
+
+    const category = entry.category || "personal";
+    counts[category] = (counts[category] || 0) + 1;
+    return counts;
+  }, Object.keys(categoryMap).reduce((counts, category) => {
+    counts[category] = 0;
+    return counts;
+  }, {}));
+}
+
+function getMostPostponedCategory(counts = getPostponeCountsByCategory()) {
+  return Object.entries(counts).reduce((mostPostponed, [category, count]) => {
+    if (count < 5) return mostPostponed;
+
+    if (!mostPostponed || count > mostPostponed.count) {
+      return { category, count };
+    }
+
+    return mostPostponed;
+  }, null);
+}
+
+function renderFrequentPostponeCategory() {
+  if (!frequentPostponeCategory) return;
+
+  const mostPostponed = getMostPostponedCategory();
+
+  frequentPostponeCategory.classList.toggle("is-visible", Boolean(mostPostponed));
+  frequentPostponeCategory.textContent = mostPostponed
+    ? `자주 미루는 카테고리: ${categoryMap[mostPostponed.category] || mostPostponed.category}`
+    : "";
 }
 
 function saveTodos() {
@@ -1475,5 +1525,6 @@ renderCalendar();
 renderTodoList();
 renderJournalPanel();
 renderOwnedSunflowerCount();
+renderFrequentPostponeCategory();
 renderPastIncompleteTodoModal();
 updateCalendarTaskPanelPosition();
