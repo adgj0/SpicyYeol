@@ -61,6 +61,7 @@ sunflowerGarden.appendChild(sfCanvas);
 SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
+const POSTPONE_HISTORY_STORAGE_KEY = "spicyyeol.postponeHistory";
 const JOURNAL_STORAGE_KEY = "spicyyeol.journalsByDate";
 const SUNFLOWER_DATES_STORAGE_KEY = "spicyyeol.sunflowersByDate";
 const today = new Date();
@@ -68,6 +69,7 @@ const todayKey = toDateKey(today);
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDateKey = todayKey;
 let todosByDate = loadTodos();
+let postponeHistory = loadPostponeHistory();
 let journalsByDate = loadJournals();
 let sunflowersByDate = loadSunflowers();
 let pendingPostponeTodo = null;
@@ -1106,6 +1108,9 @@ function postponeTodoToDate(todoRef, targetDateKey) {
     delete todosByDate[todoRef.dateKey];
   }
 
+  recordPostponeHistory(todoToMove, todoRef.dateKey, targetDateKey);
+  savePostponeHistory();
+
   todosByDate[targetDateKey] = [
     ...getTodosForDate(targetDateKey),
     {
@@ -1128,6 +1133,7 @@ function postponePastIncompleteTodosToToday() {
 
       getTodosForDate(dateKey).forEach((todo) => {
         if (isPastIncompleteTodo(todo, dateKey)) {
+          recordPostponeHistory(todo, dateKey, currentDateKey);
           movedTodos.push({
             ...todo,
             completed: false,
@@ -1161,6 +1167,7 @@ function postponePastIncompleteTodosToToday() {
   visibleDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
   saveTodos();
+  savePostponeHistory();
   renderCalendar();
   renderTodoList();
   renderJournalPanel();
@@ -1210,6 +1217,35 @@ function loadTodos() {
     console.warn("저장된 할 일을 불러오지 못했습니다.", error);
     return {};
   }
+}
+
+function loadPostponeHistory() {
+  try {
+    const savedHistory = localStorage.getItem(POSTPONE_HISTORY_STORAGE_KEY);
+    return savedHistory ? JSON.parse(savedHistory) : [];
+  } catch (error) {
+    console.warn("Failed to load postpone history.", error);
+    return [];
+  }
+}
+
+function savePostponeHistory() {
+  localStorage.setItem(POSTPONE_HISTORY_STORAGE_KEY, JSON.stringify(postponeHistory));
+}
+
+function recordPostponeHistory(todo, sourceDateKey, targetDateKey) {
+  if (!todo) return;
+
+  postponeHistory.unshift({
+    id: crypto.randomUUID(),
+    todoId: todo.id,
+    text: todo.text,
+    sourceDateKey,
+    targetDateKey,
+    category: todo.category || "personal",
+    priority: todo.priority || "medium",
+    postponedAt: new Date().toISOString()
+  });
 }
 
 function saveTodos() {
