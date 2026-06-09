@@ -95,6 +95,11 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
+}
+
+.frequent-postpone-category:hover {
+  background: #ffeadd;
 }
 
 .frequent-postpone-priority.is-visible,
@@ -985,6 +990,37 @@ button {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.category-postpone-stats-modal {
+  width: min(320px, 90%);
+  gap: 12px;
+}
+
+.category-postpone-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.category-postpone-stats-header h3 {
+  margin: 0;
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: #f4f1e8;
 }
 .modal-content input, .modal-content select {
   width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;

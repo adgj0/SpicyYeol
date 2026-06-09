@@ -58,6 +58,8 @@ const priorityGroupsContainer = document.querySelector("#priorityGroupsContainer
 const ddayList = document.querySelector("#ddayList");
 const frequentPostponeCategory = document.querySelector("#frequentPostponeCategory");
 const frequentPostponePriority = document.querySelector("#frequentPostponePriority");
+const categoryPostponeStatsModal = document.querySelector("#categoryPostponeStatsModal");
+const categoryPostponeStatsCloseBtn = document.querySelector("#categoryPostponeStatsCloseBtn");
 let ddays = JSON.parse(localStorage.getItem("spicyyeol.ddays") || "[]");
 
 const sfCanvas = createSunflowerCanvas(SunflowerState.stageIdx, SunflowerState.moodIdx, 150);
@@ -120,6 +122,26 @@ filterTabsContainer.addEventListener("click", (e) => {
 
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+if (frequentPostponeCategory && categoryPostponeStatsModal) {
+  frequentPostponeCategory.addEventListener("click", () => {
+    categoryPostponeStatsModal.style.display = "flex";
+  });
+}
+
+if (categoryPostponeStatsCloseBtn && categoryPostponeStatsModal) {
+  categoryPostponeStatsCloseBtn.addEventListener("click", () => {
+    categoryPostponeStatsModal.style.display = "none";
+  });
+}
+
+if (categoryPostponeStatsModal) {
+  categoryPostponeStatsModal.addEventListener("click", (event) => {
+    if (event.target === categoryPostponeStatsModal) {
+      categoryPostponeStatsModal.style.display = "none";
+    }
+  });
+}
 
 if (pastIncompleteCancelBtn) {
   pastIncompleteCancelBtn.addEventListener("click", () => {
