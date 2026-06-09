@@ -38,6 +38,7 @@ const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const pastIncompleteTodoModal = document.querySelector("#pastIncompleteTodoModal");
+const pastIncompletePostponeBtn = document.querySelector("#pastIncompletePostponeBtn");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
 const modalDateInput = document.querySelector("#modalDateInput");
@@ -100,6 +101,12 @@ filterTabsContainer.addEventListener("click", (e) => {
 
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+if (pastIncompletePostponeBtn) {
+  pastIncompletePostponeBtn.addEventListener("click", () => {
+    postponePastIncompleteTodosToToday();
+  });
+}
 
 // 팝업 저장 (추가/수정 공통)
 modalSaveBtn.addEventListener("click", () => {
@@ -1038,6 +1045,55 @@ function postponeTodoToDate(todoRef, targetDateKey) {
       wasProcrastinated: true
     }
   ];
+}
+
+function postponePastIncompleteTodosToToday() {
+  const movedTodos = [];
+
+  Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .forEach((dateKey) => {
+      const remainingTodos = [];
+
+      getTodosForDate(dateKey).forEach((todo) => {
+        if (isPastIncompleteTodo(todo, dateKey)) {
+          movedTodos.push({
+            ...todo,
+            completed: false,
+            status: todo.status || "pending",
+            wasProcrastinated: true
+          });
+          return;
+        }
+
+        remainingTodos.push(todo);
+      });
+
+      if (remainingTodos.length > 0) {
+        todosByDate[dateKey] = remainingTodos;
+      } else {
+        delete todosByDate[dateKey];
+      }
+    });
+
+  if (movedTodos.length === 0) {
+    renderPastIncompleteTodoModal();
+    return;
+  }
+
+  todosByDate[todayKey] = [
+    ...getTodosForDate(todayKey),
+    ...movedTodos
+  ];
+  pendingPostponeTodo = null;
+  selectedDateKey = todayKey;
+  visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  saveTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
+  todoInput.focus();
 }
 
 // TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
