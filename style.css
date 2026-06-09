@@ -70,11 +70,11 @@ button {
   display: none;
   max-width: 100%;
   margin: 0 0 14px;
-  border: 1px solid rgba(185, 74, 72, 0.28);
+  border: 1px solid rgba(202, 119, 47, 0.32);
   border-radius: 8px;
   padding: 10px 12px;
-  background: #fff4ed;
-  color: var(--danger);
+  background: #fff3e2;
+  color: #9a5a1f;
   font-size: 0.88rem;
   font-weight: 800;
   line-height: 1.35;
