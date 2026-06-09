@@ -147,6 +147,17 @@
             </div>
         </div>
     </div>
+    <div id="pastIncompleteTodoModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content past-incomplete-modal" role="dialog" aria-modal="true" aria-labelledby="pastIncompleteTodoTitle">
+            <h3 id="pastIncompleteTodoTitle">지난 날짜의 미완료 할 일이 있습니다</h3>
+            <p class="modal-message">이미 지난 날짜에 완료하지 않은 할 일이 남아 있습니다.</p>
+            <div class="modal-actions">
+                <button type="button" id="pastIncompleteCancelBtn" class="cancel-btn">취소</button>
+                <button type="button" id="pastIncompleteDeleteBtn" class="danger-btn">삭제</button>
+                <button type="button" id="pastIncompletePostponeBtn" class="save-btn">오늘로 미루기</button>
+            </div>
+        </div>
+    </div>
     <div id="trashModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
             <h3>🗑 삭제된 일정</h3>

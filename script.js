@@ -37,6 +37,10 @@ const fertGauge = document.querySelector("#fertGauge");
 const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
+const pastIncompleteTodoModal = document.querySelector("#pastIncompleteTodoModal");
+const pastIncompleteCancelBtn = document.querySelector("#pastIncompleteCancelBtn");
+const pastIncompleteDeleteBtn = document.querySelector("#pastIncompleteDeleteBtn");
+const pastIncompletePostponeBtn = document.querySelector("#pastIncompletePostponeBtn");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
 const modalDateInput = document.querySelector("#modalDateInput");
@@ -99,6 +103,24 @@ filterTabsContainer.addEventListener("click", (e) => {
 
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+if (pastIncompleteCancelBtn) {
+  pastIncompleteCancelBtn.addEventListener("click", () => {
+    pastIncompleteTodoModal.style.display = "none";
+  });
+}
+
+if (pastIncompleteDeleteBtn) {
+  pastIncompleteDeleteBtn.addEventListener("click", () => {
+    deletePastIncompleteTodos();
+  });
+}
+
+if (pastIncompletePostponeBtn) {
+  pastIncompletePostponeBtn.addEventListener("click", () => {
+    postponePastIncompleteTodosToToday();
+  });
+}
 
 // 팝업 저장 (추가/수정 공통)
 modalSaveBtn.addEventListener("click", () => {
@@ -463,7 +485,15 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 
   // 1️⃣ 미루기 버튼 처리
   if (action === "postpone") {
-    const postponeTodo = { id: todoId, dateKey: actionButton.dataset.dateKey };
+    const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (!canPostponeTodo(todo, todoDateKey)) {
+      pendingPostponeTodo = null;
+      renderCalendar();
+      renderTodoList();
+      return;
+    }
+
+    const postponeTodo = { id: todoId, dateKey: todoDateKey };
     const isSamePostponeTodo =
       Boolean(pendingPostponeTodo) &&
       pendingPostponeTodo.id === postponeTodo.id &&
@@ -604,6 +634,13 @@ document.querySelector("#trashCloseBtn").addEventListener("click", () => {
 });
 
 function renderCalendar() {
+  if (pendingPostponeTodo) {
+    const pendingTodo = getTodosForDate(pendingPostponeTodo.dateKey).find((todo) => todo.id === pendingPostponeTodo.id);
+    if (!canPostponeTodo(pendingTodo, pendingPostponeTodo.dateKey)) {
+      pendingPostponeTodo = null;
+    }
+  }
+
   calendarGrid.innerHTML = "";
   currentMonthLabel.textContent = formatMonth(visibleDate);
   postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
@@ -861,8 +898,10 @@ function renderTodoList() {
     item.append(checkbox, text, statusBadge, categoryBadge, dDay, editButton, deleteButton);
 
     // 미루기 버튼 추가
-    if (todo.daysLeft < 0 && !todo.completed) {
-      const isActivePostpone = Boolean(pendingPostponeTodo) && pendingPostponeTodo.id === todo.id;
+    if (canPostponeTodo(todo, todo.dateKey)) {
+      const isActivePostpone = Boolean(pendingPostponeTodo) &&
+        pendingPostponeTodo.id === todo.id &&
+        pendingPostponeTodo.dateKey === todo.dateKey;
       const postponeButton = document.createElement("button");
       postponeButton.className = "postpone-button";
       postponeButton.textContent = isActivePostpone ? "취소" : "미루기";
@@ -964,11 +1003,89 @@ function getTodosForDate(dateKey) {
   return todosByDate[dateKey] || [];
 }
 
+function isTodoComplete(todo) {
+  return Boolean(todo) && (todo.completed === true || todo.status === "completed");
+}
+
+function isPastIncompleteTodo(todo, dateKey) {
+  return Boolean(todo) && !isTodoComplete(todo) && dateKey < todayKey;
+}
+
+function getPastIncompleteTodos() {
+  return Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .sort()
+    .flatMap((dateKey) => getTodosForDate(dateKey)
+      .filter((todo) => isPastIncompleteTodo(todo, dateKey))
+      .map((todo) => ({
+        ...todo,
+        dateKey,
+        daysLeft: calculateDaysLeftFromToday(dateKey)
+      })));
+}
+
+function hasPastIncompleteTodos() {
+  return getPastIncompleteTodos().length > 0;
+}
+
+function renderPastIncompleteTodoModal() {
+  if (!pastIncompleteTodoModal) return;
+  pastIncompleteTodoModal.style.display = hasPastIncompleteTodos() ? "flex" : "none";
+}
+
+function canPostponeTodo(todo, dateKey) {
+  return isPastIncompleteTodo(todo, dateKey);
+}
+
+function deletePastIncompleteTodos() {
+  let deletedCount = 0;
+
+  Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .forEach((dateKey) => {
+      const remainingTodos = [];
+
+      getTodosForDate(dateKey).forEach((todo) => {
+        if (isPastIncompleteTodo(todo, dateKey)) {
+          deletedTodos.unshift({
+            ...todo,
+            dateKey,
+            deletedAt: new Date().toISOString()
+          });
+          deletedCount += 1;
+          return;
+        }
+
+        remainingTodos.push(todo);
+      });
+
+      if (remainingTodos.length > 0) {
+        todosByDate[dateKey] = remainingTodos;
+      } else {
+        delete todosByDate[dateKey];
+      }
+    });
+
+  pastIncompleteTodoModal.style.display = "none";
+
+  if (deletedCount === 0) {
+    renderPastIncompleteTodoModal();
+    return;
+  }
+
+  pendingPostponeTodo = null;
+  saveTodos();
+  saveDeletedTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
+}
+
 function postponeTodoToDate(todoRef, targetDateKey) {
   const sourceTodos = getTodosForDate(todoRef.dateKey);
   const todoToMove = sourceTodos.find((todo) => todo.id === todoRef.id);
 
-  if (!todoToMove || todoRef.dateKey === targetDateKey) {
+  if (!canPostponeTodo(todoToMove, todoRef.dateKey) || todoRef.dateKey === targetDateKey) {
     return;
   }
 
@@ -986,6 +1103,55 @@ function postponeTodoToDate(todoRef, targetDateKey) {
       wasProcrastinated: true
     }
   ];
+}
+
+function postponePastIncompleteTodosToToday() {
+  const movedTodos = [];
+
+  Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .forEach((dateKey) => {
+      const remainingTodos = [];
+
+      getTodosForDate(dateKey).forEach((todo) => {
+        if (isPastIncompleteTodo(todo, dateKey)) {
+          movedTodos.push({
+            ...todo,
+            completed: false,
+            status: todo.status || "pending",
+            wasProcrastinated: true
+          });
+          return;
+        }
+
+        remainingTodos.push(todo);
+      });
+
+      if (remainingTodos.length > 0) {
+        todosByDate[dateKey] = remainingTodos;
+      } else {
+        delete todosByDate[dateKey];
+      }
+    });
+
+  if (movedTodos.length === 0) {
+    renderPastIncompleteTodoModal();
+    return;
+  }
+
+  todosByDate[todayKey] = [
+    ...getTodosForDate(todayKey),
+    ...movedTodos
+  ];
+  pendingPostponeTodo = null;
+  selectedDateKey = todayKey;
+  visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  saveTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
+  todoInput.focus();
 }
 
 // TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
@@ -1035,6 +1201,7 @@ function loadTodos() {
 
 function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
+  renderPastIncompleteTodoModal();
 }
 
 function loadJournals() {
@@ -1259,4 +1426,5 @@ renderCalendar();
 renderTodoList();
 renderJournalPanel();
 renderOwnedSunflowerCount();
+renderPastIncompleteTodoModal();
 updateCalendarTaskPanelPosition();
