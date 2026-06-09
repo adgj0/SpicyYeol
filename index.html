@@ -9,6 +9,8 @@
 <body>
 <main class="app-shell">
     <section class="calendar-panel" aria-label="달력">
+        <div class="frequent-postpone-priority" id="frequentPostponePriority" aria-live="polite"></div>
+
         <div class="panel-heading">
             <button class="icon-button" id="prevMonth" type="button" aria-label="이전 달">‹</button>
             <h1 id="currentMonth">2026년 6월</h1>
@@ -42,7 +44,10 @@
     <section class="todo-panel" aria-label="투두리스트">
         <div class="selected-date">
             <p>선택한 날짜</p>
-            <h2 id="selectedDateLabel"></h2>
+            <div class="selected-date-main">
+                <h2 id="selectedDateLabel"></h2>
+                <div class="frequent-postpone-category" id="frequentPostponeCategory" aria-live="polite"></div>
+            </div>
         </div>
 
         <div class="dday-section" id="ddaySection">
