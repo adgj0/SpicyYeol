@@ -37,6 +37,7 @@ const fertGauge = document.querySelector("#fertGauge");
 const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
+const pastIncompleteTodoModal = document.querySelector("#pastIncompleteTodoModal");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
 const modalDateInput = document.querySelector("#modalDateInput");
@@ -981,8 +982,38 @@ function getTodosForDate(dateKey) {
   return todosByDate[dateKey] || [];
 }
 
+function isTodoComplete(todo) {
+  return Boolean(todo) && (todo.completed === true || todo.status === "completed");
+}
+
+function isPastIncompleteTodo(todo, dateKey) {
+  return Boolean(todo) && !isTodoComplete(todo) && dateKey < todayKey;
+}
+
+function getPastIncompleteTodos() {
+  return Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .sort()
+    .flatMap((dateKey) => getTodosForDate(dateKey)
+      .filter((todo) => isPastIncompleteTodo(todo, dateKey))
+      .map((todo) => ({
+        ...todo,
+        dateKey,
+        daysLeft: calculateDaysLeftFromToday(dateKey)
+      })));
+}
+
+function hasPastIncompleteTodos() {
+  return getPastIncompleteTodos().length > 0;
+}
+
+function renderPastIncompleteTodoModal() {
+  if (!pastIncompleteTodoModal) return;
+  pastIncompleteTodoModal.style.display = hasPastIncompleteTodos() ? "flex" : "none";
+}
+
 function canPostponeTodo(todo, dateKey) {
-  return Boolean(todo) && !todo.completed && dateKey < todayKey;
+  return isPastIncompleteTodo(todo, dateKey);
 }
 
 function postponeTodoToDate(todoRef, targetDateKey) {
@@ -1056,6 +1087,7 @@ function loadTodos() {
 
 function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todosByDate));
+  renderPastIncompleteTodoModal();
 }
 
 function loadJournals() {
@@ -1280,4 +1312,5 @@ renderCalendar();
 renderTodoList();
 renderJournalPanel();
 renderOwnedSunflowerCount();
+renderPastIncompleteTodoModal();
 updateCalendarTaskPanelPosition();

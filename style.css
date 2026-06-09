@@ -933,6 +933,11 @@ button {
   display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow);
 }
 .modal-content h3 { margin: 0 0 8px 0; color: var(--ink); }
+.modal-message {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
 .modal-content input, .modal-content select {
   width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;
 }
@@ -941,6 +946,7 @@ button {
 .modal-actions button { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 800; }
 .cancel-btn { background: #f2eee5; color: var(--muted); }
 .save-btn { background: var(--accent); color: white; }
+.danger-btn { background: var(--danger); color: white; }
 
 .trash-btn {
   position: relative;
