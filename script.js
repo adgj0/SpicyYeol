@@ -463,7 +463,15 @@ priorityGroupsContainer.addEventListener("click", (event) => {
 
   // 1️⃣ 미루기 버튼 처리
   if (action === "postpone") {
-    const postponeTodo = { id: todoId, dateKey: actionButton.dataset.dateKey };
+    const todo = getTodosForDate(todoDateKey).find(t => t.id === todoId);
+    if (!canPostponeTodo(todo, todoDateKey)) {
+      pendingPostponeTodo = null;
+      renderCalendar();
+      renderTodoList();
+      return;
+    }
+
+    const postponeTodo = { id: todoId, dateKey: todoDateKey };
     const isSamePostponeTodo =
       Boolean(pendingPostponeTodo) &&
       pendingPostponeTodo.id === postponeTodo.id &&
@@ -604,6 +612,13 @@ document.querySelector("#trashCloseBtn").addEventListener("click", () => {
 });
 
 function renderCalendar() {
+  if (pendingPostponeTodo) {
+    const pendingTodo = getTodosForDate(pendingPostponeTodo.dateKey).find((todo) => todo.id === pendingPostponeTodo.id);
+    if (!canPostponeTodo(pendingTodo, pendingPostponeTodo.dateKey)) {
+      pendingPostponeTodo = null;
+    }
+  }
+
   calendarGrid.innerHTML = "";
   currentMonthLabel.textContent = formatMonth(visibleDate);
   postponeGuide.classList.toggle("is-visible", Boolean(pendingPostponeTodo));
@@ -861,8 +876,10 @@ function renderTodoList() {
     item.append(checkbox, text, statusBadge, categoryBadge, dDay, editButton, deleteButton);
 
     // 미루기 버튼 추가
-    if (todo.daysLeft < 0 && !todo.completed) {
-      const isActivePostpone = Boolean(pendingPostponeTodo) && pendingPostponeTodo.id === todo.id;
+    if (canPostponeTodo(todo, todo.dateKey)) {
+      const isActivePostpone = Boolean(pendingPostponeTodo) &&
+        pendingPostponeTodo.id === todo.id &&
+        pendingPostponeTodo.dateKey === todo.dateKey;
       const postponeButton = document.createElement("button");
       postponeButton.className = "postpone-button";
       postponeButton.textContent = isActivePostpone ? "취소" : "미루기";
@@ -964,11 +981,15 @@ function getTodosForDate(dateKey) {
   return todosByDate[dateKey] || [];
 }
 
+function canPostponeTodo(todo, dateKey) {
+  return Boolean(todo) && !todo.completed && dateKey < todayKey;
+}
+
 function postponeTodoToDate(todoRef, targetDateKey) {
   const sourceTodos = getTodosForDate(todoRef.dateKey);
   const todoToMove = sourceTodos.find((todo) => todo.id === todoRef.id);
 
-  if (!todoToMove || todoRef.dateKey === targetDateKey) {
+  if (!canPostponeTodo(todoToMove, todoRef.dateKey) || todoRef.dateKey === targetDateKey) {
     return;
   }
 
