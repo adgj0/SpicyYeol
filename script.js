@@ -38,6 +38,8 @@ const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const pastIncompleteTodoModal = document.querySelector("#pastIncompleteTodoModal");
+const pastIncompleteTodoTitle = document.querySelector("#pastIncompleteTodoTitle");
+const pastIncompleteTodoMessage = pastIncompleteTodoModal?.querySelector(".modal-message");
 const pastIncompleteCancelBtn = document.querySelector("#pastIncompleteCancelBtn");
 const pastIncompleteDeleteBtn = document.querySelector("#pastIncompleteDeleteBtn");
 const pastIncompletePostponeBtn = document.querySelector("#pastIncompletePostponeBtn");
@@ -77,6 +79,9 @@ let journalsByDate = loadJournals();
 let sunflowersByDate = loadSunflowers();
 let pendingPostponeTodo = null;
 let dismissedPastIncompleteModalDateKey = null;
+let isReviewingPastIncompletePostpone = false;
+let pastIncompletePostponeQueue = [];
+let pastIncompletePostponeIndex = 0;
 let isSunflowerPlacementMode = false;
 let isJournalEditing = false;
 let journalMessage = "";
@@ -118,6 +123,11 @@ modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none")
 
 if (pastIncompleteCancelBtn) {
   pastIncompleteCancelBtn.addEventListener("click", () => {
+    if (isReviewingPastIncompletePostpone) {
+      cancelCurrentPastIncompleteTodo();
+      return;
+    }
+
     dismissedPastIncompleteModalDateKey = getCurrentDateKey();
     pastIncompleteTodoModal.style.display = "none";
   });
@@ -125,13 +135,23 @@ if (pastIncompleteCancelBtn) {
 
 if (pastIncompleteDeleteBtn) {
   pastIncompleteDeleteBtn.addEventListener("click", () => {
+    if (isReviewingPastIncompletePostpone) {
+      deleteCurrentPastIncompleteTodo();
+      return;
+    }
+
     deletePastIncompleteTodos();
   });
 }
 
 if (pastIncompletePostponeBtn) {
   pastIncompletePostponeBtn.addEventListener("click", () => {
-    postponePastIncompleteTodosToToday();
+    if (isReviewingPastIncompletePostpone) {
+      postponeCurrentPastIncompleteTodoToToday();
+      return;
+    }
+
+    startPastIncompletePostponeReview();
   });
 }
 
@@ -1026,7 +1046,7 @@ function isPastIncompleteTodo(todo, dateKey) {
 
 function getPastIncompleteTodos() {
   return Object.keys(todosByDate)
-    .filter((dateKey) => dateKey < todayKey)
+    .filter((dateKey) => dateKey < getCurrentDateKey())
     .sort()
     .flatMap((dateKey) => getTodosForDate(dateKey)
       .filter((todo) => isPastIncompleteTodo(todo, dateKey))
@@ -1047,11 +1067,172 @@ function getCurrentDateKey() {
 
 function renderPastIncompleteTodoModal() {
   if (!pastIncompleteTodoModal) return;
+
+  if (isReviewingPastIncompletePostpone) {
+    renderPastIncompletePostponeReviewModal();
+    return;
+  }
+
+  renderPastIncompleteDefaultModalText();
   const shouldShowModal =
     hasPastIncompleteTodos() &&
     dismissedPastIncompleteModalDateKey !== getCurrentDateKey();
 
-  pastIncompleteTodoModal.style.display = shouldShowModal ? "flex" : "none";
+  if (shouldShowModal) {
+    startPastIncompletePostponeReview();
+    return;
+  }
+
+  pastIncompleteTodoModal.style.display = "none";
+}
+
+function renderPastIncompleteDefaultModalText() {
+  if (pastIncompleteTodoTitle) {
+    pastIncompleteTodoTitle.textContent = "\uc9c0\ub09c \ub0a0\uc9dc\uc758 \ubbf8\uc644\ub8cc \ud560 \uc77c\uc774 \uc788\uc2b5\ub2c8\ub2e4";
+  }
+
+  if (pastIncompleteTodoMessage) {
+    pastIncompleteTodoMessage.textContent = "\uc774\ubbf8 \uc9c0\ub09c \ub0a0\uc9dc\uc5d0 \uc644\ub8cc\ud558\uc9c0 \uc54a\uc740 \ud560 \uc77c\uc774 \ub0a8\uc544 \uc788\uc2b5\ub2c8\ub2e4.";
+  }
+
+  if (pastIncompleteCancelBtn) pastIncompleteCancelBtn.textContent = "\ucde8\uc18c";
+  if (pastIncompleteDeleteBtn) pastIncompleteDeleteBtn.textContent = "\uc0ad\uc81c";
+  if (pastIncompletePostponeBtn) pastIncompletePostponeBtn.textContent = "\uc624\ub298\ub85c \ubbf8\ub8e8\uae30";
+}
+
+function startPastIncompletePostponeReview() {
+  pastIncompletePostponeQueue = getPastIncompleteTodos().map((todo) => ({
+    id: todo.id,
+    dateKey: todo.dateKey
+  }));
+  pastIncompletePostponeIndex = 0;
+  isReviewingPastIncompletePostpone = pastIncompletePostponeQueue.length > 0;
+
+  if (!isReviewingPastIncompletePostpone) {
+    renderPastIncompleteTodoModal();
+    return;
+  }
+
+  renderPastIncompletePostponeReviewModal();
+}
+
+function renderPastIncompletePostponeReviewModal() {
+  const currentTodoRef = getCurrentPastIncompletePostponeRef();
+
+  if (!currentTodoRef) {
+    finishPastIncompletePostponeReview(false);
+    return;
+  }
+
+  const currentTodo = getTodosForDate(currentTodoRef.dateKey)
+    .find((todo) => todo.id === currentTodoRef.id);
+  if (pastIncompleteTodoTitle) {
+    pastIncompleteTodoTitle.textContent = `${currentTodo.text}\uc758 \uae30\ud55c\uc774 \uc774\ubbf8 \uc9c0\ub0ac\uc2b5\ub2c8\ub2e4.`;
+  }
+
+  if (pastIncompleteTodoMessage) {
+    pastIncompleteTodoMessage.textContent = "";
+  }
+
+  if (pastIncompleteCancelBtn) pastIncompleteCancelBtn.textContent = "\ucde8\uc18c";
+  if (pastIncompleteDeleteBtn) pastIncompleteDeleteBtn.textContent = "\uc0ad\uc81c";
+  if (pastIncompletePostponeBtn) pastIncompletePostponeBtn.textContent = "\uc624\ub298\ub85c \ubbf8\ub8e8\uae30";
+
+  pastIncompleteTodoModal.style.display = "flex";
+}
+
+function getCurrentPastIncompletePostponeRef() {
+  while (pastIncompletePostponeIndex < pastIncompletePostponeQueue.length) {
+    const todoRef = pastIncompletePostponeQueue[pastIncompletePostponeIndex];
+    const currentTodo = getTodosForDate(todoRef.dateKey).find((todo) => todo.id === todoRef.id);
+
+    if (isPastIncompleteTodo(currentTodo, todoRef.dateKey)) {
+      return todoRef;
+    }
+
+    pastIncompletePostponeIndex += 1;
+  }
+
+  return null;
+}
+
+function cancelCurrentPastIncompleteTodo() {
+  pastIncompletePostponeIndex += 1;
+  renderPastIncompletePostponeReviewModal();
+}
+
+function deleteCurrentPastIncompleteTodo() {
+  const todoRef = getCurrentPastIncompletePostponeRef();
+
+  if (!todoRef) {
+    finishPastIncompletePostponeReview(false);
+    return;
+  }
+
+  const todoToDelete = getTodosForDate(todoRef.dateKey)
+    .find((todo) => todo.id === todoRef.id);
+
+  if (todoToDelete) {
+    deletedTodos.unshift({
+      ...todoToDelete,
+      dateKey: todoRef.dateKey,
+      deletedAt: new Date().toISOString()
+    });
+    todosByDate[todoRef.dateKey] = getTodosForDate(todoRef.dateKey)
+      .filter((todo) => todo.id !== todoRef.id);
+
+    if (todosByDate[todoRef.dateKey].length === 0) {
+      delete todosByDate[todoRef.dateKey];
+    }
+  }
+
+  pastIncompletePostponeIndex += 1;
+  pendingPostponeTodo = null;
+
+  saveTodos();
+  saveDeletedTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
+  renderPastIncompletePostponeReviewModal();
+}
+
+function postponeCurrentPastIncompleteTodoToToday() {
+  const todoRef = getCurrentPastIncompletePostponeRef();
+
+  if (!todoRef) {
+    finishPastIncompletePostponeReview(false);
+    return;
+  }
+
+  const currentDate = new Date();
+  const currentDateKey = toDateKey(currentDate);
+
+  postponeTodoToDate(todoRef, currentDateKey);
+  pastIncompletePostponeIndex += 1;
+  pendingPostponeTodo = null;
+  selectedDateKey = currentDateKey;
+  visibleDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+  saveTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
+  renderPastIncompletePostponeReviewModal();
+  todoInput.focus();
+}
+
+function finishPastIncompletePostponeReview(shouldDismissForToday) {
+  isReviewingPastIncompletePostpone = false;
+  pastIncompletePostponeQueue = [];
+  pastIncompletePostponeIndex = 0;
+
+  if (shouldDismissForToday) {
+    dismissedPastIncompleteModalDateKey = getCurrentDateKey();
+  }
+
+  renderPastIncompleteDefaultModalText();
+  pastIncompleteTodoModal.style.display = "none";
 }
 
 function canPostponeTodo(todo, dateKey) {
@@ -1131,56 +1312,7 @@ function postponeTodoToDate(todoRef, targetDateKey) {
 }
 
 function postponePastIncompleteTodosToToday() {
-  const movedTodos = [];
-  const currentDate = new Date();
-  const currentDateKey = toDateKey(currentDate);
-
-  Object.keys(todosByDate)
-    .filter((dateKey) => dateKey < currentDateKey)
-    .forEach((dateKey) => {
-      const remainingTodos = [];
-
-      getTodosForDate(dateKey).forEach((todo) => {
-        if (isPastIncompleteTodo(todo, dateKey)) {
-          recordPostponeHistory(todo, dateKey, currentDateKey);
-          movedTodos.push({
-            ...todo,
-            completed: false,
-            status: todo.status || "pending",
-            wasProcrastinated: true
-          });
-          return;
-        }
-
-        remainingTodos.push(todo);
-      });
-
-      if (remainingTodos.length > 0) {
-        todosByDate[dateKey] = remainingTodos;
-      } else {
-        delete todosByDate[dateKey];
-      }
-    });
-
-  if (movedTodos.length === 0) {
-    renderPastIncompleteTodoModal();
-    return;
-  }
-
-  todosByDate[currentDateKey] = [
-    ...getTodosForDate(currentDateKey),
-    ...movedTodos
-  ];
-  pendingPostponeTodo = null;
-  selectedDateKey = currentDateKey;
-  visibleDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
-  saveTodos();
-  savePostponeHistory();
-  renderCalendar();
-  renderTodoList();
-  renderJournalPanel();
-  todoInput.focus();
+  startPastIncompletePostponeReview();
 }
 
 // TodoList 표시 개선: 오늘 날짜를 기준으로 선택 날짜까지 남은 일수를 계산합니다.
