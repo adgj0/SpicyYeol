@@ -1475,12 +1475,9 @@ function renderCategoryPostponeStats() {
     return;
   }
 
-  const maxCount = Math.max(...categoryStatsOrder.map((category) => counts[category] || 0));
-
   categoryStatsOrder.forEach((category) => {
     const count = counts[category] || 0;
     const percent = Math.round((count / totalCount) * 100);
-    const barPercent = maxCount > 0 ? (count / maxCount) * 100 : 0;
 
     const row = document.createElement("div");
     row.className = "category-postpone-stat-row";
@@ -1502,7 +1499,7 @@ function renderCategoryPostponeStats() {
 
     const bar = document.createElement("div");
     bar.className = "category-postpone-stat-bar";
-    bar.style.width = `${barPercent}%`;
+    bar.style.width = `${percent}%`;
 
     info.append(name, value);
     track.appendChild(bar);
