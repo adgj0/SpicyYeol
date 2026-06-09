@@ -38,6 +38,8 @@ const ownedSunflowerCount = document.querySelector("#ownedSunflowerCount");
 const todoListUrgent = document.querySelector("#todoListUrgent");
 const todoModal = document.querySelector("#todoModal");
 const pastIncompleteTodoModal = document.querySelector("#pastIncompleteTodoModal");
+const pastIncompleteCancelBtn = document.querySelector("#pastIncompleteCancelBtn");
+const pastIncompleteDeleteBtn = document.querySelector("#pastIncompleteDeleteBtn");
 const pastIncompletePostponeBtn = document.querySelector("#pastIncompletePostponeBtn");
 const modalTitle = document.querySelector("#modalTitle");
 const modalTextInput = document.querySelector("#modalTextInput");
@@ -101,6 +103,18 @@ filterTabsContainer.addEventListener("click", (e) => {
 
 // 팝업 닫기
 modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none");
+
+if (pastIncompleteCancelBtn) {
+  pastIncompleteCancelBtn.addEventListener("click", () => {
+    pastIncompleteTodoModal.style.display = "none";
+  });
+}
+
+if (pastIncompleteDeleteBtn) {
+  pastIncompleteDeleteBtn.addEventListener("click", () => {
+    deletePastIncompleteTodos();
+  });
+}
 
 if (pastIncompletePostponeBtn) {
   pastIncompletePostponeBtn.addEventListener("click", () => {
@@ -1021,6 +1035,50 @@ function renderPastIncompleteTodoModal() {
 
 function canPostponeTodo(todo, dateKey) {
   return isPastIncompleteTodo(todo, dateKey);
+}
+
+function deletePastIncompleteTodos() {
+  let deletedCount = 0;
+
+  Object.keys(todosByDate)
+    .filter((dateKey) => dateKey < todayKey)
+    .forEach((dateKey) => {
+      const remainingTodos = [];
+
+      getTodosForDate(dateKey).forEach((todo) => {
+        if (isPastIncompleteTodo(todo, dateKey)) {
+          deletedTodos.unshift({
+            ...todo,
+            dateKey,
+            deletedAt: new Date().toISOString()
+          });
+          deletedCount += 1;
+          return;
+        }
+
+        remainingTodos.push(todo);
+      });
+
+      if (remainingTodos.length > 0) {
+        todosByDate[dateKey] = remainingTodos;
+      } else {
+        delete todosByDate[dateKey];
+      }
+    });
+
+  pastIncompleteTodoModal.style.display = "none";
+
+  if (deletedCount === 0) {
+    renderPastIncompleteTodoModal();
+    return;
+  }
+
+  pendingPostponeTodo = null;
+  saveTodos();
+  saveDeletedTodos();
+  renderCalendar();
+  renderTodoList();
+  renderJournalPanel();
 }
 
 function postponeTodoToDate(todoRef, targetDateKey) {
