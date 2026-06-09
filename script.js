@@ -93,6 +93,12 @@ const categoryMap = {
   work: "업무"
 };
 
+const priorityPostponeMessages = {
+  high: "중요한 일을 자주 미루고 있어요. 오늘은 가장 중요한 일 하나만 먼저 끝내볼까요?",
+  medium: "보통 난이도의 일이 자주 밀리고 있어요. 부담 없는 일부터 하나씩 정리해봐요.",
+  low: "작은 일들이 조금씩 쌓이고 있어요. 가벼운 할 일부터 빠르게 비워봐요."
+};
+
 // 🌟 탭 요소 및 현재 상태 변수
 const filterTabsContainer = document.querySelector("#filterTabs");
 let currentFilter = "all";
@@ -1307,14 +1313,41 @@ function getMostPostponedCategory(counts = getPostponeCountsByCategory()) {
   }, null);
 }
 
+function getPostponeCountsByPriority(history = postponeHistory) {
+  return getActivePostponeHistory(history).reduce((counts, entry) => {
+    if (!entry) return counts;
+
+    const priority = priorityPostponeMessages[entry.priority] ? entry.priority : "medium";
+    counts[priority] += 1;
+    return counts;
+  }, {
+    high: 0,
+    medium: 0,
+    low: 0
+  });
+}
+
+function getMostPostponedPriority(counts = getPostponeCountsByPriority()) {
+  return ["high", "medium", "low"].reduce((mostPostponed, priority) => {
+    const count = counts[priority] || 0;
+
+    if (count === 0) return mostPostponed;
+    if (!mostPostponed || count > mostPostponed.count) {
+      return { priority, count };
+    }
+
+    return mostPostponed;
+  }, null);
+}
+
 function renderFrequentPostponeCategory() {
   if (!frequentPostponeCategory) return;
 
-  const mostPostponed = getMostPostponedCategory();
+  const mostPostponed = getMostPostponedPriority();
 
   frequentPostponeCategory.classList.toggle("is-visible", Boolean(mostPostponed));
   frequentPostponeCategory.textContent = mostPostponed
-    ? `자주 미루는 카테고리: ${categoryMap[mostPostponed.category] || mostPostponed.category}`
+    ? priorityPostponeMessages[mostPostponed.priority]
     : "";
 }
 

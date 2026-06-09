@@ -68,17 +68,17 @@ button {
 
 .frequent-postpone-category {
   display: none;
-  align-self: flex-end;
   max-width: 100%;
+  margin: -4px 0 14px;
   border: 1px solid rgba(185, 74, 72, 0.28);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: #fff4ed;
   color: var(--danger);
   font-size: 0.88rem;
   font-weight: 800;
   line-height: 1.35;
-  text-align: right;
+  text-align: left;
 }
 
 .frequent-postpone-category.is-visible {
