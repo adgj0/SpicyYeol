@@ -63,6 +63,7 @@ SunflowerPanel.init();
 
 const STORAGE_KEY = "spicyyeol.todosByDate";
 const POSTPONE_HISTORY_STORAGE_KEY = "spicyyeol.postponeHistory";
+const POSTPONE_HISTORY_RETENTION_DAYS = 30;
 const JOURNAL_STORAGE_KEY = "spicyyeol.journalsByDate";
 const SUNFLOWER_DATES_STORAGE_KEY = "spicyyeol.sunflowersByDate";
 const today = new Date();
@@ -1223,7 +1224,14 @@ function loadTodos() {
 function loadPostponeHistory() {
   try {
     const savedHistory = localStorage.getItem(POSTPONE_HISTORY_STORAGE_KEY);
-    return savedHistory ? JSON.parse(savedHistory).map(normalizePostponeHistoryEntry) : [];
+    const history = savedHistory ? JSON.parse(savedHistory).map(normalizePostponeHistoryEntry) : [];
+    const activeHistory = getActivePostponeHistory(history);
+
+    if (activeHistory.length !== history.length) {
+      localStorage.setItem(POSTPONE_HISTORY_STORAGE_KEY, JSON.stringify(activeHistory));
+    }
+
+    return activeHistory;
   } catch (error) {
     console.warn("Failed to load postpone history.", error);
     return [];
@@ -1231,6 +1239,7 @@ function loadPostponeHistory() {
 }
 
 function savePostponeHistory() {
+  postponeHistory = getActivePostponeHistory(postponeHistory);
   localStorage.setItem(POSTPONE_HISTORY_STORAGE_KEY, JSON.stringify(postponeHistory));
   renderFrequentPostponeCategory();
 }
@@ -1242,6 +1251,17 @@ function normalizePostponeHistoryEntry(entry) {
     ...entry,
     postponedDateKey: entry.postponedDateKey || toDateKey(new Date(entry.postponedAt || entry.targetDateKey || entry.sourceDateKey))
   };
+}
+
+function getActivePostponeHistory(history = postponeHistory) {
+  const cutoffDate = new Date();
+  cutoffDate.setHours(0, 0, 0, 0);
+  cutoffDate.setDate(cutoffDate.getDate() - POSTPONE_HISTORY_RETENTION_DAYS);
+  const cutoffDateKey = toDateKey(cutoffDate);
+
+  return history
+    .map(normalizePostponeHistoryEntry)
+    .filter((entry) => entry && entry.postponedDateKey > cutoffDateKey);
 }
 
 function recordPostponeHistory(todo, sourceDateKey, targetDateKey) {
@@ -1263,7 +1283,7 @@ function recordPostponeHistory(todo, sourceDateKey, targetDateKey) {
 }
 
 function getPostponeCountsByCategory(history = postponeHistory) {
-  return history.reduce((counts, entry) => {
+  return getActivePostponeHistory(history).reduce((counts, entry) => {
     if (!entry) return counts;
 
     const category = entry.category || "personal";
