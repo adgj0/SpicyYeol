@@ -71,6 +71,7 @@ let todosByDate = loadTodos();
 let journalsByDate = loadJournals();
 let sunflowersByDate = loadSunflowers();
 let pendingPostponeTodo = null;
+let dismissedPastIncompleteModalDateKey = null;
 let isSunflowerPlacementMode = false;
 let isJournalEditing = false;
 let journalMessage = "";
@@ -106,6 +107,7 @@ modalCancelBtn.addEventListener("click", () => todoModal.style.display = "none")
 
 if (pastIncompleteCancelBtn) {
   pastIncompleteCancelBtn.addEventListener("click", () => {
+    dismissedPastIncompleteModalDateKey = getCurrentDateKey();
     pastIncompleteTodoModal.style.display = "none";
   });
 }
@@ -1008,7 +1010,7 @@ function isTodoComplete(todo) {
 }
 
 function isPastIncompleteTodo(todo, dateKey) {
-  return Boolean(todo) && !isTodoComplete(todo) && dateKey < todayKey;
+  return Boolean(todo) && !isTodoComplete(todo) && dateKey < getCurrentDateKey();
 }
 
 function getPastIncompleteTodos() {
@@ -1028,9 +1030,17 @@ function hasPastIncompleteTodos() {
   return getPastIncompleteTodos().length > 0;
 }
 
+function getCurrentDateKey() {
+  return toDateKey(new Date());
+}
+
 function renderPastIncompleteTodoModal() {
   if (!pastIncompleteTodoModal) return;
-  pastIncompleteTodoModal.style.display = hasPastIncompleteTodos() ? "flex" : "none";
+  const shouldShowModal =
+    hasPastIncompleteTodos() &&
+    dismissedPastIncompleteModalDateKey !== getCurrentDateKey();
+
+  pastIncompleteTodoModal.style.display = shouldShowModal ? "flex" : "none";
 }
 
 function canPostponeTodo(todo, dateKey) {
@@ -1039,9 +1049,10 @@ function canPostponeTodo(todo, dateKey) {
 
 function deletePastIncompleteTodos() {
   let deletedCount = 0;
+  const currentDateKey = getCurrentDateKey();
 
   Object.keys(todosByDate)
-    .filter((dateKey) => dateKey < todayKey)
+    .filter((dateKey) => dateKey < currentDateKey)
     .forEach((dateKey) => {
       const remainingTodos = [];
 
@@ -1107,9 +1118,11 @@ function postponeTodoToDate(todoRef, targetDateKey) {
 
 function postponePastIncompleteTodosToToday() {
   const movedTodos = [];
+  const currentDate = new Date();
+  const currentDateKey = toDateKey(currentDate);
 
   Object.keys(todosByDate)
-    .filter((dateKey) => dateKey < todayKey)
+    .filter((dateKey) => dateKey < currentDateKey)
     .forEach((dateKey) => {
       const remainingTodos = [];
 
@@ -1139,13 +1152,13 @@ function postponePastIncompleteTodosToToday() {
     return;
   }
 
-  todosByDate[todayKey] = [
-    ...getTodosForDate(todayKey),
+  todosByDate[currentDateKey] = [
+    ...getTodosForDate(currentDateKey),
     ...movedTodos
   ];
   pendingPostponeTodo = null;
-  selectedDateKey = todayKey;
-  visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  selectedDateKey = currentDateKey;
+  visibleDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
   saveTodos();
   renderCalendar();
